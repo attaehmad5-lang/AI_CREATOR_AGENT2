@@ -1,6 +1,7 @@
 import os
 import time
 from pathlib import Path
+
 import pytest
 from ai_creator_agent.env.errors import WorkspaceError
 from ai_creator_agent.env.ephemeral import MARKER, EphemeralWorkspace, sweep_stale
@@ -24,10 +25,9 @@ def test_cleanup_removes_and_is_idempotent(tmp_path):
 
 def test_context_manager_cleans_on_exception(tmp_path):
     w = ws(tmp_path)
-    with pytest.raises(RuntimeError):
-        with w as path:
-            created = path
-            raise RuntimeError("boom")
+    with pytest.raises(RuntimeError), w as path:
+        created = path
+        raise RuntimeError("boom")
     assert not created.exists()
 
 def test_path_before_create_raises(tmp_path):
