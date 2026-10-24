@@ -9,12 +9,12 @@ Regression tests are present for audit, binaries, CLI, diagnostics, env files, e
 
 ## Verified facts
 - Earlier local checks against the supplied archive were reported as **325 passed, 1 skipped, 92.24% coverage**. Those results apply to the archive in the local runtime; they do not verify the current GitHub branch.
-- GitHub Actions run **40123125660** for the latest report commit `1e522e79215815ee3487e8411a74c0c511db4d36` failed at **Check required project inputs** because `uv.lock` is absent. Dependency sync, tests, security gates, and the container job were skipped. Earlier run **40109245473** failed at the same gate.
+- GitHub Actions run **40123125660** failed at the old required-input check because `uv.lock` was absent. The workflow has now been updated to generate a temporary lock on the pinned runner and upload it as an artifact; the revised workflow has not yet produced a confirmed run for the latest commit.
 - The new integration module and prior regression-test additions are committed on `env-suite`; the latest GitHub Actions run confirms that execution is still blocked before tests start, at the missing-lockfile check.
 - Generating `uv.lock` locally was blocked because downloading the pinned Python 3.11.8 failed due to DNS/network unavailability; available Python 3.13.5 does not satisfy `==3.11.*`.
 
 A helper script, `scripts/generate_lock.sh`, now checks for the pinned uv version, installs the repository-pinned Python, generates `uv.lock`, and validates that the lock is current. It has been committed but cannot be executed in the current offline/Python-3.13-only runtime; it is not a substitute for generating and testing the lockfile on the pinned toolchain.\n\n## Blocking items
-1. `uv.lock` is absent, so frozen dependency sync, dependency auditing, and Docker builds cannot pass as configured.
+1. `uv.lock` is absent from the branch. CI now attempts to generate a temporary lock with the pinned Python/uv toolchain and uploads it as a short-lived artifact, allowing downstream checks to proceed diagnostically. This does not commit the lockfile; a reviewed, valid `uv.lock` still must be committed before merge.
 2. The newly added integration tests have not been executed on the branch and may expose API or runtime mismatches.
 3. The reconstructed GitHub-branch modules and tests have not been executed together in GitHub CI.
 4. Ruff, mypy, pre-commit, pip-audit, and Docker gates remain unverified for this branch.
