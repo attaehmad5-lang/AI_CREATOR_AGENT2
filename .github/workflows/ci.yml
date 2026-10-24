@@ -58,6 +58,16 @@ jobs:
         run: make sync
       - name: Diagnose environment
         run: make diagnose
+      - name: TEMPORARY: format working tree and capture review patch
+        run: |
+          uv run --frozen ruff format src tests
+          git diff --binary > /tmp/ruff-format.patch
+      - name: TEMPORARY: preserve formatter patch for review
+        uses: actions/upload-artifact@v4
+        with:
+          name: ruff-format-patch-${{ github.run_id }}
+          path: /tmp/ruff-format.patch
+          retention-days: 3
       - name: Run quality and security gates
         run: make ci
 
