@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import os
 from collections.abc import Mapping
-from enum import Enum
+from enum import StrEnum
 from pathlib import Path
 
 from .envfile import load_env_file
@@ -13,7 +13,7 @@ from .errors import ConfigError
 PREFIX = "AI_CREATOR_"
 
 
-class Profile(str, Enum):
+class Profile(StrEnum):
     DEV = "dev"
     TEST = "test"
     STAGING = "staging"
