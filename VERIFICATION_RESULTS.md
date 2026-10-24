@@ -2,34 +2,19 @@
 
 Status: **NOT READY TO MERGE**
 
-This report records checks run against the supplied Python Environment Suite archive in the available local runtime. It does not imply that the source tree is present in this GitHub repository; source import is still outstanding.
+## Repository state
+The environment-suite package and a subset of its tests have been added to branch `env-suite`. This is **not yet the complete source/test tree from the supplied archive**. The branch currently contains environment modules and tests for audit, binaries, CLI, env files, ephemeral workspaces, preflight, profiles, Python-version checks, resources, and secret scanning. Tests for settings, diagnostics, hardware, lifecycle, hot reload, and process-level integration from the archive are still missing.
 
-## Local checks completed
+## Verified facts
+- Earlier local checks against the supplied archive were reported as **325 passed, 1 skipped, 92.24% coverage**. These are archive-local results, not results from the current GitHub branch.
+- GitHub Actions run **40109245473** for head commit `ead2bbe60527342bb34f4b65ea54b2343f6ac414` failed at **Check required project inputs**. The following dependency, test, security, and container steps were skipped.
+- Additional test files `tests/env/test_audit.py` and `tests/env/test_binaries.py` were subsequently committed to `env-suite` (latest known commit: `df2b501b24945020c761c8762bed4828b35726e6`). No workflow run was returned for that commit, so these changes are not CI-verified.
 
-| Check | Result |
-|---|---|
-| Pytest suite | 325 passed, 1 skipped |
-| Coverage | 92.24% |
-| Environment settings tests | 16 passed |
-| Python compileall | PASS |
-| Shell syntax checks for bootstrap/verification scripts | PASS |
-| Secret scanner against tracked files | PASS; no secrets detected |
-
-The skipped diagnostics test requires a non-root user.
-
-## GitHub Actions
-
-- Run **40092009587** initially failed in `astral-sh/setup-uv` because the cache action required a `uv.lock` file that was absent.
-- The workflow was corrected to disable that cache and explicitly check required inputs before proceeding.
-- Run **40092314072** then passed the uv setup step and failed at the new required-input check, confirming that the source package and lockfile are still missing from this repository. Dependency, test, security, and container jobs did not run.
-
-## Remaining blockers
-
-- The original source and test tree from the supplied archive has not yet been imported into this repository.
-- `uv.lock` is absent, so locked dependency sync and dependency audit cannot be verified.
-- The pinned Python version is 3.11.8; the available local runtime is Python 3.13.5 and network/DNS restrictions prevented downloading Python 3.11.8.
-- Ruff, mypy, pre-commit, pip-audit, and Docker were unavailable in the local runtime, so those gates were not verified locally.
+## Blocking items
+1. `uv.lock` is absent. Frozen sync, dependency auditing, and Docker builds therefore cannot pass as configured.
+2. The original source and test tree has not been fully imported; several source-archive test modules remain missing.
+3. The newly added/reconstructed GitHub-branch files have not been run together in GitHub CI. The archive's local test results must not be represented as branch verification.
+4. Ruff, mypy, pre-commit, pip-audit, and Docker gates remain unverified for the branch.
 
 ## Merge gate
-
-Do not merge this PR until the source tree and a verified lockfile are present and the full GitHub Actions workflow passes.
+Keep this pull request as a draft. Do not merge until the missing source and tests are imported, a valid lockfile is generated and committed using the pinned toolchain, and the full GitHub Actions verify and container jobs pass.
