@@ -114,9 +114,10 @@ def apply_memory_cap(
     res = resource_module
     if res is None:
         try:
-            import resource as res
+            import resource
         except ImportError:
             raise ResourceLimitError("resource limits unsupported here") from None
+        res = resource
     attr = "RLIMIT_AS" if mode is CapMode.RLIMIT_AS else "RLIMIT_DATA"
     which = getattr(res, attr, None)
     if which is None:
