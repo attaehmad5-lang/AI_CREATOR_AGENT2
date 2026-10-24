@@ -46,7 +46,7 @@ def test_load_missing_ok(tmp_path):
 
 def test_load_invalid_utf8(tmp_path):
     path = tmp_path / ".env"
-    path.write_bytes(b"A=\\xff\\xfe\n")
+    path.write_bytes(bytes([65, 61, 255, 254, 10]))
     with pytest.raises(EnvFileError):
         load_env_file(path)
 
