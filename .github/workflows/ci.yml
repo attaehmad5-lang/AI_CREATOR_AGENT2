@@ -31,12 +31,29 @@ jobs:
       - name: Check required project inputs
         run: |
           test -f pyproject.toml
-          test -f uv.lock
           test -f src/ai_creator_agent/__init__.py
+          test -f .python-version
       - name: Install pinned Python
         run: uv python install "$(tr -d '[:space:]' < .python-version)"
       - name: Install ffmpeg
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg
+      - name: Generate or validate dependency lock
+        run: |
+          python_version="$(tr -d '[:space:]' < .python-version)"
+          if test -f uv.lock; then
+            uv lock --check --python "$python_version"
+          else
+            echo "::warning::uv.lock is absent from the branch; generating a temporary CI lock. Commit the resulting lockfile before merge."
+            uv lock --python "$python_version"
+          fi
+      - name: Preserve generated lockfile as CI artifact
+        if: always() && hashFiles('uv.lock') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: generated-uv-lock-${{ github.run_id }}
+          path: uv.lock
+          if-no-files-found: error
+          retention-days: 7
       - name: Sync locked dependencies
         run: make sync
       - name: Diagnose environment
