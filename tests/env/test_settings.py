@@ -1,4 +1,5 @@
 import pytest
+from pydantic import ValidationError
 
 pytest.importorskip("pydantic_settings")
 
@@ -67,7 +68,7 @@ def test_secrets_masked_in_safe_dict(tmp_path):
 
 def test_settings_are_frozen(tmp_path):
     s = Settings.from_profile("dev", tmp_path, {})
-    with pytest.raises(Exception):
+    with pytest.raises((ValidationError, TypeError)):
         s.log_level = "ERROR"
 
 
@@ -83,7 +84,7 @@ def test_paths_become_absolute(tmp_path):
 
 
 def test_reloadable_fields_are_real_fields():
-    assert RELOADABLE_FIELDS <= set(Settings.model_fields)
+    assert set(Settings.model_fields) >= RELOADABLE_FIELDS
 
 
 def test_as_mapping_contains_all_fields(tmp_path):
