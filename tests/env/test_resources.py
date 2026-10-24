@@ -1,6 +1,16 @@
 import pytest
+
 from ai_creator_agent.env.errors import ResourceLimitError
-from ai_creator_agent.env.resources import CapMode, GuardState, MemoryGuard, MemorySnapshot, apply_memory_cap, cgroup_memory_limit_bytes, parse_meminfo, parse_rss_from_status
+from ai_creator_agent.env.resources import (
+    CapMode,
+    GuardState,
+    MemoryGuard,
+    MemorySnapshot,
+    apply_memory_cap,
+    cgroup_memory_limit_bytes,
+    parse_meminfo,
+    parse_rss_from_status,
+)
 MB = 1024 * 1024
 
 def test_parse_meminfo_converts_kb():
