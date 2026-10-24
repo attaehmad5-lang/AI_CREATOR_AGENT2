@@ -13,7 +13,7 @@ Regression tests are present for audit, binaries, CLI, diagnostics, env files, e
 - The new integration module and prior regression-test additions are committed on `env-suite`; the latest GitHub Actions run confirms that execution is still blocked before tests start, at the missing-lockfile check.
 - Generating `uv.lock` locally was blocked because downloading the pinned Python 3.11.8 failed due to DNS/network unavailability; available Python 3.13.5 does not satisfy `==3.11.*`.
 
-## Blocking items
+A helper script, `scripts/generate_lock.sh`, now checks for the pinned uv version, installs the repository-pinned Python, generates `uv.lock`, and validates that the lock is current. It has been committed but cannot be executed in the current offline/Python-3.13-only runtime; it is not a substitute for generating and testing the lockfile on the pinned toolchain.\n\n## Blocking items
 1. `uv.lock` is absent, so frozen dependency sync, dependency auditing, and Docker builds cannot pass as configured.
 2. The newly added integration tests have not been executed on the branch and may expose API or runtime mismatches.
 3. The reconstructed GitHub-branch modules and tests have not been executed together in GitHub CI.
