@@ -1,8 +1,12 @@
 import pytest
 
 from ai_creator_agent.env.binaries import (
-    extension_suffixes, find_extension_module, find_library, import_optional,
-    load_library, platform_lib_names,
+    extension_suffixes,
+    find_extension_module,
+    find_library,
+    import_optional,
+    load_library,
+    platform_lib_names,
 )
 from ai_creator_agent.env.errors import BinaryResolutionError
 
