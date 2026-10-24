@@ -7,11 +7,26 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import Any, Literal
 
-from pydantic import Field, SecretStr, ValidationError, field_validator, model_validator
-from pydantic_settings import BaseSettings, PydanticBaseSettingsSource, SettingsConfigDict
+from pydantic import (
+    Field,
+    SecretStr,
+    ValidationError,
+    field_validator,
+    model_validator,
+)
+from pydantic_settings import (
+    BaseSettings,
+    PydanticBaseSettingsSource,
+    SettingsConfigDict,
+)
 
 from .errors import ConfigError
-from .profiles import PREFIX, Profile, load_profile_environment, resolve_profile
+from .profiles import (
+    PREFIX,
+    Profile,
+    load_profile_environment,
+    resolve_profile,
+)
 
 RELOADABLE_FIELDS: frozenset[str] = frozenset({
     "log_level", "request_timeout_s", "max_concurrent_jobs",
