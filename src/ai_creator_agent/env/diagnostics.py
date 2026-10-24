@@ -10,7 +10,7 @@ import tempfile
 import time
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from pathlib import Path
 from typing import Any, NamedTuple
 
@@ -21,8 +21,8 @@ from .pyversion import check_python_version, in_virtualenv, read_pinned_version
 from .resources import MB, MemorySnapshot, read_memory_snapshot
 
 
-class Status(str, Enum):
-    PASS = "pass"
+class Status(StrEnum):
+    PASS = "pass"  # noqa: S105
     WARN = "warn"
     FAIL = "fail"
 
