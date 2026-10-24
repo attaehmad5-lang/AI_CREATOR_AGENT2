@@ -142,7 +142,7 @@ def test_permissions_secret_file_levels(tmp_path):
 def test_permissions_world_writable_dir(tmp_path):
     d = tmp_path / "data"
     d.mkdir()
-    os.chmod(d, 0o777)
+    os.chmod(d, 0o777)  # noqa: S103
     assert one(suite(tmp_path).run(), "permissions").status is Status.WARN
 
 
