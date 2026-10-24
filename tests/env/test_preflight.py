@@ -50,7 +50,7 @@ def test_no_minimum_only_needs_presence():
 
 
 def test_run_preflight_raises_with_all_failures():
-    with pytest.raises(PreflightError, match="git.*ffmpeg|ffmpeg.*git"):
+    with pytest.raises(PreflightError, match=r"git.*ffmpeg|ffmpeg.*git"):
         run_preflight((CliRequirement("git"), CliRequirement("ffmpeg")), _which({}), lambda p, a: "")
 
 
