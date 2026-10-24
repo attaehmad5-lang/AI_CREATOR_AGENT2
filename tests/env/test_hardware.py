@@ -1,5 +1,3 @@
-from types import SimpleNamespace
-
 import pytest
 
 from ai_creator_agent.env.errors import HardwareError
