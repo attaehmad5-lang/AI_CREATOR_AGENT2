@@ -11,6 +11,7 @@ from ai_creator_agent.env.resources import (
     parse_meminfo,
     parse_rss_from_status,
 )
+
 MB = 1024 * 1024
 
 def test_parse_meminfo_converts_kb():
