@@ -7,7 +7,7 @@ import signal
 import threading
 from collections.abc import Callable
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 from pathlib import Path
 from typing import Any
 
@@ -90,7 +90,7 @@ def read_memory_snapshot() -> MemorySnapshot:
     return MemorySnapshot(total, available, rss)
 
 
-class CapMode(str, Enum):
+class CapMode(StrEnum):
     RLIMIT_AS = "rlimit_as"
     RLIMIT_DATA = "rlimit_data"
 
@@ -132,7 +132,7 @@ def apply_memory_cap(
     return CapResult(max_bytes, target, mode, clamped)
 
 
-class GuardState(str, Enum):
+class GuardState(StrEnum):
     OK = "ok"
     WARN = "warn"
     EXCEEDED = "exceeded"
