@@ -9,8 +9,8 @@ Regression tests are present for audit, binaries, CLI, diagnostics, env files, e
 
 ## Verified facts
 - Earlier local checks against the supplied archive were reported as **325 passed, 1 skipped, 92.24% coverage**. Those results apply to the archive in the local runtime; they do not verify the current GitHub branch.
-- GitHub Actions run **40109245473** for commit `ead2bbe60527342bb34f4b65ea54b2343f6ac414` failed at **Check required project inputs**. Dependency sync, tests, security gates, and container jobs were skipped.
-- The new integration module and prior regression-test additions are committed on `env-suite`; no end-to-end CI result has yet been confirmed for these commits.
+- GitHub Actions run **40123125660** for the latest report commit `1e522e79215815ee3487e8411a74c0c511db4d36` failed at **Check required project inputs** because `uv.lock` is absent. Dependency sync, tests, security gates, and the container job were skipped. Earlier run **40109245473** failed at the same gate.
+- The new integration module and prior regression-test additions are committed on `env-suite`; the latest GitHub Actions run confirms that execution is still blocked before tests start, at the missing-lockfile check.
 - Generating `uv.lock` locally was blocked because downloading the pinned Python 3.11.8 failed due to DNS/network unavailability; available Python 3.13.5 does not satisfy `==3.11.*`.
 
 ## Blocking items
