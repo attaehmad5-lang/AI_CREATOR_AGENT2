@@ -9,6 +9,7 @@ from ai_creator_agent.env.envfile import (
 )
 from ai_creator_agent.env.errors import EnvFileError
 
+
 @pytest.mark.parametrize("text,expected", [
     ("A=1", {"A": "1"}), ("export A=1", {"A": "1"}),
     ('A="x y"', {"A": "x y"}), ("A='x $y'", {"A": "x $y"}),
