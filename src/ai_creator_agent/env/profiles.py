@@ -8,7 +8,7 @@ from enum import StrEnum
 from pathlib import Path
 
 from .envfile import load_env_file
-from .errors import ConfigError
+from .errors import ConfigError, EnvFileError
 
 PREFIX = "AI_CREATOR_"
 
@@ -67,7 +67,10 @@ def load_profile_environment(profile: Profile, root: Path, environ: Mapping[str,
     env = os.environ if environ is None else environ
     merged: dict[str, str] = dict(PROFILE_DEFAULTS[profile])
     for path in profile_env_files(profile, root):
-        merged.update(load_env_file(path, environ=env, missing_ok=True))
+        try:
+            merged.update(load_env_file(path, environ=env, missing_ok=True))
+        except EnvFileError as exc:
+            raise ConfigError(f"invalid profile environment file {path}: {exc}") from exc
     for key, value in env.items():
         if key.startswith(PREFIX):
             merged[key] = value
