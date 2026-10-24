@@ -8,7 +8,7 @@ import shutil
 import subprocess
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from .errors import HardwareError
@@ -16,7 +16,7 @@ from .errors import HardwareError
 _MB = 1024 * 1024
 
 
-class DeviceKind(str, Enum):
+class DeviceKind(StrEnum):
     CUDA = "cuda"
     ROCM = "rocm"
     MPS = "mps"
