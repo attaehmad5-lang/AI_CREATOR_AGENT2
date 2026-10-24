@@ -1,7 +1,6 @@
 .git
 .venv
 var
-tests
 .env*
 !.env.example
 *.pem
