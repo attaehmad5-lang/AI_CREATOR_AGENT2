@@ -1,7 +1,13 @@
 import pytest
 
 from ai_creator_agent.env.errors import PreflightError
-from ai_creator_agent.env.preflight import CliRequirement, check_cli, parse_version, requirements_for, run_preflight
+from ai_creator_agent.env.preflight import (
+    CliRequirement,
+    check_cli,
+    parse_version,
+    requirements_for,
+    run_preflight,
+)
 
 
 @pytest.mark.parametrize("text,expected", [
