@@ -27,7 +27,12 @@ jobs:
       - uses: astral-sh/setup-uv@v3
         with:
           version: ${{ env.UV_VERSION }}
-          enable-cache: true
+          enable-cache: false
+      - name: Check required project inputs
+        run: |
+          test -f pyproject.toml
+          test -f uv.lock
+          test -f src/ai_creator_agent/__init__.py
       - name: Install pinned Python
         run: uv python install "$(tr -d '[:space:]' < .python-version)"
       - name: Install ffmpeg
