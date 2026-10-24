@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 
 import pytest
+
 from ai_creator_agent.env.errors import SecretLeakError
 from ai_creator_agent.env.secretscan import (
     forbidden_file_findings,
