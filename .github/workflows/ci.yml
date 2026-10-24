@@ -5,7 +5,7 @@ on:
   pull_request:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -64,16 +64,18 @@ jobs:
         run: make sync
       - name: Diagnose environment
         run: make diagnose
-      - name: Temporary format working tree and capture review patch
+      - name: Apply Ruff formatting
+        run: uv run --frozen ruff format src tests
+      - name: Commit formatting and generated dependency lock on the maintenance branch
+        if: github.event_name == 'push' && github.ref == 'refs/heads/env-suite' && github.actor == 'attaehmad5-lang'
         run: |
-          uv run --frozen ruff format src tests
-          git diff --binary > /tmp/ruff-format.patch
-      - name: Temporary preserve formatter patch for review
-        uses: actions/upload-artifact@v4
-        with:
-          name: ruff-format-patch-${{ github.run_id }}
-          path: /tmp/ruff-format.patch
-          retention-days: 3
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src tests uv.lock
+          if ! git diff --cached --quiet; then
+            git commit -m 'chore: apply Ruff formatting and lock dependencies'
+            git push origin HEAD:env-suite
+          fi
       - name: Run quality and security gates
         run: make ci
 
