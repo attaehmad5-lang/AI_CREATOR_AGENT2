@@ -33,7 +33,7 @@ def test_context_manager_cleans_on_exception(tmp_path):
 
 def test_path_before_create_raises(tmp_path):
     with pytest.raises(WorkspaceError):
-        ws(tmp_path).path
+        _ = ws(tmp_path).path
 
 def test_create_twice_returns_same(tmp_path):
     w = ws(tmp_path)
