@@ -2,7 +2,12 @@ import json
 
 import pytest
 
-from ai_creator_agent.env.audit import AuditError, audit_lockfile, parse_pip_audit_json, run_safety
+from ai_creator_agent.env.audit import (
+    AuditError,
+    audit_lockfile,
+    parse_pip_audit_json,
+    run_safety,
+)
 
 REPORT = {"dependencies": [
     {"name": "ok-pkg", "version": "1.0", "vulns": []},
