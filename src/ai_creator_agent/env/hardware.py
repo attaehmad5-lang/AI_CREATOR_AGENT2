@@ -61,7 +61,7 @@ def _safe_run(cmd: Sequence[str], timeout: float = 10.0) -> str | None:
 
 def _import_torch() -> Any | None:
     try:
-        import torch
+        import torch  # type: ignore[import-not-found]
     except Exception:
         return None
     return torch
