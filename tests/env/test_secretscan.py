@@ -1,6 +1,7 @@
 import os
-import pytest
 from pathlib import Path
+
+import pytest
 from ai_creator_agent.env.errors import SecretLeakError
 from ai_creator_agent.env.secretscan import (
     forbidden_file_findings, format_findings, git_files, iter_files, redact,
@@ -100,7 +101,8 @@ def test_forbidden_filenames(name, flagged):
     assert bool(forbidden_file_findings([Path(name)])) is flagged
 
 def test_git_files_parses_nul_separated_output():
-    runner = lambda args: "a.py\x00dir/b.py\x00"
+    def runner(args):
+        return "a.py\x00dir/b.py\x00"
     assert git_files("staged", runner) == [Path("a.py"), Path("dir/b.py")]
 
 def test_git_unknown_mode():
