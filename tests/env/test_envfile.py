@@ -2,12 +2,12 @@ import os
 
 import pytest
 
+from ai_creator_agent.env.errors import EnvFileError
 from ai_creator_agent.env.envfile import (
     is_private_file,
     load_env_file,
     parse_env_text,
 )
-from ai_creator_agent.env.errors import EnvFileError
 
 @pytest.mark.parametrize("text,expected", [
     ("A=1", {"A": "1"}), ("export A=1", {"A": "1"}),
