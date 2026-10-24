@@ -4,8 +4,16 @@ from pathlib import Path
 import pytest
 from ai_creator_agent.env.errors import SecretLeakError
 from ai_creator_agent.env.secretscan import (
-    forbidden_file_findings, format_findings, git_files, iter_files, redact,
-    scan_file, scan_git, scan_paths, scan_text, shannon_entropy,
+    forbidden_file_findings,
+    format_findings,
+    git_files,
+    iter_files,
+    redact,
+    scan_file,
+    scan_git,
+    scan_paths,
+    scan_text,
+    shannon_entropy,
 )
 AWS = "AKIA" + "ZQ4M7XK2PL9TB3WN"
 GITHUB = "ghp_" + "a1B2c3D4e5F6g7H8i9J0k1L2m3N4o5P6q7R8"
