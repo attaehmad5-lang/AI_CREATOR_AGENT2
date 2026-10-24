@@ -17,13 +17,18 @@ This report records checks run against the supplied Python Environment Suite arc
 
 The skipped diagnostics test requires a non-root user.
 
-## Blockers
+## GitHub Actions
+
+- Run **40092009587** initially failed in `astral-sh/setup-uv` because the cache action required a `uv.lock` file that was absent.
+- The workflow was corrected to disable that cache and explicitly check required inputs before proceeding.
+- Run **40092314072** then passed the uv setup step and failed at the new required-input check, confirming that the source package and lockfile are still missing from this repository. Dependency, test, security, and container jobs did not run.
+
+## Remaining blockers
 
 - The original source and test tree from the supplied archive has not yet been imported into this repository.
 - `uv.lock` is absent, so locked dependency sync and dependency audit cannot be verified.
 - The pinned Python version is 3.11.8; the available local runtime is Python 3.13.5 and network/DNS restrictions prevented downloading Python 3.11.8.
 - Ruff, mypy, pre-commit, pip-audit, and Docker were unavailable in the local runtime, so those gates were not verified locally.
-- GitHub Actions run 40092009587 failed during `astral-sh/setup-uv` cache setup because no `uv.lock` matched its cache dependency glob. The workflow was changed to disable that cache and to fail early with explicit checks for required project inputs.
 
 ## Merge gate
 
