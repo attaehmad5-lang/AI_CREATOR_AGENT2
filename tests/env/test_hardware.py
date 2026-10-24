@@ -2,8 +2,17 @@ import pytest
 
 from ai_creator_agent.env.errors import HardwareError
 from ai_creator_agent.env.hardware import (
-    DeviceInfo, DeviceKind, Probes, cpu_device, detect_cuda, detect_hardware,
-    detect_mps, detect_rocm, parse_nvidia_smi, parse_rocminfo, select_device,
+    DeviceInfo,
+    DeviceKind,
+    Probes,
+    cpu_device,
+    detect_cuda,
+    detect_hardware,
+    detect_mps,
+    detect_rocm,
+    parse_nvidia_smi,
+    parse_rocminfo,
+    select_device,
 )
 
 
