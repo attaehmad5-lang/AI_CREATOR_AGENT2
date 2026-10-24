@@ -63,10 +63,7 @@ def check_python_version(
 ) -> VersionCheck:
     """Compare the interpreter to the pin."""
     actual = running if running is not None else running_version()
-    if strict_patch:
-        ok = actual == pinned
-    else:
-        ok = actual[:2] == pinned[:2]
+    ok = actual == pinned if strict_patch else actual[:2] == pinned[:2]
     message = (
         f"python {_fmt(actual)} matches pin {_fmt(pinned)}"
         if ok
