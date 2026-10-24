@@ -4,8 +4,8 @@ from pathlib import Path
 
 import pytest
 
-from ai_creator_agent.env.errors import WorkspaceError
 from ai_creator_agent.env.ephemeral import MARKER, EphemeralWorkspace, sweep_stale
+from ai_creator_agent.env.errors import WorkspaceError
 
 def ws(tmp_path, **kw):
     return EphemeralWorkspace(tmp_path / "root", register_atexit=False, **kw)
