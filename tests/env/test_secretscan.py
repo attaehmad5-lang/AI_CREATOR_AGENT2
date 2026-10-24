@@ -15,6 +15,7 @@ from ai_creator_agent.env.secretscan import (
     scan_text,
     shannon_entropy,
 )
+
 AWS = "AKIA" + "ZQ4M7XK2PL9TB3WN"
 GITHUB = "ghp_" + "a1B2c3D4e5F6g7H8i9J0k1L2m3N4o5P6q7R8"
 SLACK = "xoxb-" + "123456789012-abcdefghijklmnop"
