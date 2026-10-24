@@ -83,5 +83,5 @@ def test_every_profile_has_defaults():
 
 def test_malformed_profile_file_raises(tmp_path):
     (tmp_path / ".env.dev").write_text("not valid\n")
-    with pytest.raises(Exception):
+    with pytest.raises(ConfigError):
         load_profile_environment(Profile.DEV, tmp_path, {})
