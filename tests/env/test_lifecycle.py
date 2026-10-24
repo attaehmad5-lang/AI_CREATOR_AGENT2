@@ -5,7 +5,11 @@ import threading
 
 import pytest
 
-from ai_creator_agent.env.lifecycle import ShutdownCoordinator, atomic_write_json, load_state
+from ai_creator_agent.env.lifecycle import (
+    ShutdownCoordinator,
+    atomic_write_json,
+    load_state,
+)
 
 
 def test_atomic_roundtrip_leaves_no_temp_files(tmp_path):
