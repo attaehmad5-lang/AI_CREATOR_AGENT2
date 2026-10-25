@@ -1,0 +1,9 @@
+title = "ai-creator-agent gitleaks policy"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Documented placeholders only"
+paths = ['''\.env\.example$''', '''uv\.lock$''', '''tests/env/test_secretscan\.py$''']
+regexes = ['''(?i)(changeme|your[_-]?key|example)''']

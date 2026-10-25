@@ -1,0 +1,39 @@
+minimum_pre_commit_version: "3.7.0"
+default_language_version:
+  python: python3.11
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: check-yaml
+      - id: check-toml
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: ["--maxkb=1024"]
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.6.9
+    hooks:
+      - id: ruff
+        args: ["--fix", "--exit-non-zero-on-fix"]
+      - id: ruff-format
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.21.2
+    hooks:
+      - id: gitleaks
+  - repo: local
+    hooks:
+      - id: mypy
+        name: mypy (strict)
+        entry: uv run --frozen mypy src
+        language: system
+        types: [python]
+        pass_filenames: false
+      - id: secret-scan
+        name: ai-creator secret scan (staged)
+        entry: uv run --frozen python -m ai_creator_agent.env scan-secrets --staged
+        language: system
+        pass_filenames: false
+        always_run: true

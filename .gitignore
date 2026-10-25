@@ -1,0 +1,17 @@
+.venv/
+__pycache__/
+*.pyc
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+var/
+.env
+.env.local
+.env.dev
+.env.test
+.env.staging
+.env.prod
+*.pem
+*.p12
