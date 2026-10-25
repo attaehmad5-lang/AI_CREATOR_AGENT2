@@ -5,7 +5,7 @@ on:
   pull_request:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -65,18 +65,6 @@ jobs:
         run: make sync
       - name: Diagnose environment
         run: make diagnose
-      - name: Apply Ruff formatting
-        run: uv run --frozen ruff format src tests
-      - name: Commit formatting and generated dependency lock on the maintenance branch
-        if: github.event_name == 'pull_request' && github.actor == 'attaehmad5-lang' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'env-suite'
-        run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add src tests uv.lock
-          if ! git diff --cached --quiet; then
-            git commit -m 'chore: apply Ruff formatting and lock dependencies'
-            git push origin HEAD:env-suite
-          fi
       - name: Run quality and security gates
         run: make ci
 
