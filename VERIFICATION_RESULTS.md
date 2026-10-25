@@ -2,22 +2,25 @@
 
 Status: **NOT READY TO MERGE**
 
-## Repository state
-The environment-suite package is partially imported on branch `env-suite`. Modules cover audit, native binaries, CLI, diagnostics, env files, ephemeral workspaces, errors, hardware detection, hot reload, lifecycle, preflight, profiles, Python-version checks, resources, secret scanning, and settings.
+## Current branch verification
 
-Regression tests are present for audit, binaries, CLI, diagnostics, env files, ephemeral workspaces, hardware, hot reload, lifecycle, preflight, profiles, Python-version checks, resources, secret scanning, and settings. A bounded real-process integration module has now been added for unhandled-exception state persistence, normal-exit workspace cleanup, and SIGTERM cleanup/state persistence. These new tests are committed but have not yet been executed against the GitHub branch.
+- A pinned-toolchain dependency lockfile has now been generated on GitHub Actions and committed as `uv.lock` on `env-suite`.
+- Ruff lint: **PASS** on run 76.
+- Ruff format check: **PASS** on run 76 (37 files already formatted).
+- Strict mypy: **PASS** on run 76 (19 source files).
+- Pytest: **PASS** on run 76 — 294 passed; total coverage 90.13%, above the 80% gate.
+- Secret scan: **FAIL** on run 76 because its own generic-assignment fixture was detected in `tests/env/test_secretscan.py`. The fixture was changed to assemble the assignment from adjacent string fragments so the scanner still tests the same input without self-detecting the source. A fresh workflow run is pending; this fix is not yet verified.
+- Container job: **NOT VERIFIED**; it was skipped because the verify job failed at the secret scan.
+- Latest workflow: [run 79](https://github.com/attaehmad5-lang/AI_CREATOR_AGENT2/actions/runs/40154658914). It is pending and must finish before the current branch can be considered verified.
 
-## Verified facts
-- Earlier local checks against the supplied archive were reported as **325 passed, 1 skipped, 92.24% coverage**. Those results apply to the archive in the local runtime; they do not verify the current GitHub branch.
-- GitHub Actions run **40123125660** failed at the old required-input check because `uv.lock` was absent. The workflow has now been updated to generate a temporary lock on the pinned runner and upload it as an artifact; the revised workflow has not yet produced a confirmed run for the latest commit.
-- The new integration module and prior regression-test additions are committed on `env-suite`; the latest GitHub Actions run confirms that execution is still blocked before tests start, at the missing-lockfile check.
-- Generating `uv.lock` locally was blocked because downloading the pinned Python 3.11.8 failed due to DNS/network unavailability; available Python 3.13.5 does not satisfy `==3.11.*`.
+## Source parity and scope
 
-A helper script, `scripts/generate_lock.sh`, now checks for the pinned uv version, installs the repository-pinned Python, generates `uv.lock`, and validates that the lock is current. It has been committed but cannot be executed in the current offline/Python-3.13-only runtime; it is not a substitute for generating and testing the lockfile on the pinned toolchain.\n\n## Blocking items
-1. `uv.lock` is absent from the branch. CI now attempts to generate a temporary lock with the pinned Python/uv toolchain and uploads it as a short-lived artifact, allowing downstream checks to proceed diagnostically. This does not commit the lockfile; a reviewed, valid `uv.lock` still must be committed before merge.
-2. The newly added integration tests have not been executed on the branch and may expose API or runtime mismatches.
-3. The reconstructed GitHub-branch modules and tests have not been executed together in GitHub CI.
-4. Ruff, mypy, pre-commit, pip-audit, and Docker gates remain unverified for this branch.
+The branch remains a partial import of the supplied project archive. The archived integration test and several source modules are more comprehensive than the reconstructed branch versions. Passing the current branch tests does not prove parity with the original archive or production readiness. Reconcile the intended source against the supplied archive and rerun the complete suite before merge.
 
-## Merge gate
-Keep the pull request as a draft. Do not merge until a valid lockfile is generated and committed using the pinned toolchain, and both verification and container jobs pass end-to-end.
+## Remaining merge blockers
+
+1. Verify the secret-scan fixture fix in a fresh GitHub Actions run.
+2. Complete all CI quality/security gates and the container test/build jobs.
+3. Reconcile source and test parity with the supplied project archive; add back missing behaviors/tests rather than treating the current 294-test suite as complete.
+4. Review the generated `uv.lock` on the pinned Python/uv toolchain and ensure `uv lock --check` passes from a clean checkout.
+5. Keep PR #1 as Draft until every required gate passes. Do not merge based only on the 294 passing pytest tests.
