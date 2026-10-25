@@ -105,6 +105,7 @@ def test_detect_hardware_report_uses_cpu_fallback():
     report = detect_hardware(probes=p)
     assert report.selected.kind is DeviceKind.CPU and report.cpu_count >= 1
 
+
 MB = 1024 * 1024
 
 
