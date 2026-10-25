@@ -47,18 +47,7 @@ jobs:
       - name: Generate and validate dependency lock
         run: |
           python_version="$(tr -d '[:space:]' < .python-version)"
-          cp uv.lock "$RUNNER_TEMP/uv.lock.before"
-          uv lock --upgrade-package pytest --python "$python_version"
-          diff -u "$RUNNER_TEMP/uv.lock.before" uv.lock || true
           uv lock --check --python "$python_version"
-      - name: Preserve generated lockfile as CI artifact
-        if: always() && hashFiles('uv.lock') != ''
-        uses: actions/upload-artifact@v4
-        with:
-          name: generated-uv-lock-${{ github.run_id }}
-          path: uv.lock
-          if-no-files-found: error
-          retention-days: 7
       - name: Sync locked dependencies
         run: make sync
       - name: Diagnose environment
