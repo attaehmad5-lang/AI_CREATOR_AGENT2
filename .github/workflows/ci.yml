@@ -44,19 +44,11 @@ jobs:
             sudo apt-get update
             sudo apt-get install -y --no-install-recommends ffmpeg
           fi
-      - name: Generate or validate dependency lock
+      - name: Validate committed dependency lock
         run: |
           python_version="$(tr -d '[:space:]' < .python-version)"
-          uv lock --upgrade-package pytest --python "$python_version"
+          test -s uv.lock
           uv lock --check --python "$python_version"
-      - name: Preserve generated lockfile as CI artifact
-        if: always() && hashFiles('uv.lock') != ''
-        uses: actions/upload-artifact@v4
-        with:
-          name: generated-uv-lock-${{ github.run_id }}
-          path: uv.lock
-          if-no-files-found: error
-          retention-days: 7
       - name: Sync locked dependencies
         run: make sync
       - name: Diagnose environment
