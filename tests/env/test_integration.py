@@ -226,7 +226,7 @@ def test_real_cli_secret_scan_exit_codes(tmp_path):
     )
     command = [sys.executable, "-m", "ai_creator_agent.env", "scan-secrets"]
     good = subprocess.run(
-        command + [str(clean)], env=child_env(), capture_output=True, timeout=10
+        [*command, str(clean)], env=child_env(), capture_output=True, timeout=10
     )
     bad = subprocess.run(
         [*command, str(dirty)], env=child_env(), capture_output=True, timeout=10
