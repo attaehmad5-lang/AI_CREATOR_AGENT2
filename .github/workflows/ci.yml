@@ -70,18 +70,12 @@ jobs:
       - name: Commit formatting and generated dependency lock on the maintenance branch
         if: github.event_name == 'pull_request' && github.actor == 'attaehmad5-lang' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'env-suite'
         run: |
-          git diff --binary > /tmp/ruff-format.patch
-          cp uv.lock /tmp/generated-uv.lock
-          git fetch origin env-suite
-          git checkout -B env-suite origin/env-suite
-          git apply /tmp/ruff-format.patch
-          cp /tmp/generated-uv.lock uv.lock
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add src tests uv.lock
           if ! git diff --cached --quiet; then
             git commit -m 'chore: apply Ruff formatting and lock dependencies'
-            git push origin env-suite
+            git push origin HEAD:env-suite
           fi
       - name: Run quality and security gates
         run: make ci
