@@ -154,20 +154,20 @@ def test_cpu_only_torch_overrides_nvidia_smi():
     probes = make_probes(
         torch=fake_torch(cuda=False),
         which={"nvidia-smi": "/x"},
-        run={"nvidia-smi": "RTX, 100, 1.0\\n"},
+        run={"nvidia-smi": "RTX, 100, 1.0\n"},
     )
     assert detect_cuda(probes) == []
 
 
 def test_nvidia_smi_discovers_multiple_gpus_without_torch():
-    output = "NVIDIA A, 24564, 550.1\\nNVIDIA B, 24576, 550.1\\n"
+    output = "NVIDIA A, 24564, 550.1\nNVIDIA B, 24576, 550.1\n"
     found = detect_cuda(make_probes(which={"nvidia-smi": "/x"}, run={"nvidia-smi": output}))
     assert [device.index for device in found] == [0, 1]
     assert found[1].driver == "550.1"
 
 
 def test_nvidia_smi_skips_garbage_lines():
-    assert len(parse_nvidia_smi("junk\\n,,\\nGPU, notnum, 1.0\\n")) == 1
+    assert len(parse_nvidia_smi("junk\n,,\nGPU, notnum, 1.0\n")) == 1
     assert parse_nvidia_smi("GPU, notnum, 1.0")[0].memory_mb is None
 
 
@@ -193,8 +193,8 @@ def test_rocm_via_torch_hip_is_not_misreported_as_cuda():
 
 def test_rocminfo_keeps_only_gpu_agents():
     output = (
-        "Agent 1\\n Marketing Name: AMD Ryzen 9\\n Device Type: CPU\\n"
-        "Agent 2\\n Marketing Name: AMD Instinct MI250X\\n Device Type: GPU\\n"
+        "Agent 1\n Marketing Name: AMD Ryzen 9\n Device Type: CPU\n"
+        "Agent 2\n Marketing Name: AMD Instinct MI250X\n Device Type: GPU\n"
     )
     found = parse_rocminfo(output)
     assert [device.name for device in found] == ["AMD Instinct MI250X"]
