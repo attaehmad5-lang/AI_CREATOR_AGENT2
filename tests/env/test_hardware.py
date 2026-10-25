@@ -267,7 +267,6 @@ def test_detect_hardware_reports_torch_version_and_cpu():
     assert report.devices[-1].kind is DeviceKind.CPU
 
 
-
 def test_explicit_unavailable_strict_raises():
     with pytest.raises(HardwareError):
         select_device([cpu_device()], "cuda", strict=True)
