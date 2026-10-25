@@ -13,7 +13,7 @@ Latest successful workflow: [run 40180862223](https://github.com/attaehmad5-lang
 - Pytest: **PASS** — 305 passed; 91.49% total coverage (CI verify job)
 - Tracked-secret scan: **PASS**
 - Dependency vulnerability audit: **PASS** (audit reported clean)
-- Container test stage: **PASS** (303 passed, 1 skipped in the container stage)
+- Container test stage: **PASS** (304 passed, 1 skipped in the container stage)
 - Hardened runtime Docker build: **PASS**
 - Pinned Python 3.11.8 runtime and ffmpeg diagnostics: **PASS**
 
@@ -25,7 +25,7 @@ The supplied archive `ai_creator_agent_project_preflight_fixed2.zip` contains mo
 - Archive `tests/env/test_integration.py`: 262 lines / 8,371 bytes.
 - Branch integration tests were expanded and now cover shutdown-state persistence, signal handling, normal workspace cleanup, crash recovery/stale cleanup, and a real memory-guard scenario. Full archive parity is **not yet demonstrated**.
 
-The archive suite also covers additional real-process cases, including second-signal force exit, OS memory limits, cap non-escalation, CLI hardware/secret-scan behavior, hot reload, and machine diagnostics. These must be reconciled and run where supported; do not claim production readiness from the current green CI alone.
+The branch now includes real-process tests for second-signal force exit, OS memory limits, cap non-escalation, CLI hardware/secret-scan behavior, hot reload, and machine diagnostics. These tests pass in CI (the container skips one non-root-only test). Full test-suite and source-module parity against the supplied archive still needs a file-by-file reconciliation; do not claim production readiness from green CI alone.
 
 ## Dependency lock caveat
 
