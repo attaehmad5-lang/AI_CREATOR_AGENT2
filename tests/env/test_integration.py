@@ -343,7 +343,7 @@ def test_real_diagnostics_run_without_failures(tmp_path):
     )
 
     pin = tmp_path / ".python-version"
-    pin.write_text(".".join(str(p) for p in sys.version_info[:3]) + "\\n")
+    pin.write_text(".".join(str(p) for p in sys.version_info[:3]) + "\n")
     config = DiagnosticConfig(
         pin_file=pin,
         require_venv=False,
