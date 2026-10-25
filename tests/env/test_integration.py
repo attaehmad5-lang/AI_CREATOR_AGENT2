@@ -64,7 +64,6 @@ print(path, flush=True)
     assert created.is_absolute()
     assert not created.exists()
 
-
 @pytest.mark.skipif(os.name != "posix", reason="POSIX signal semantics")
 def test_sigterm_child_persists_state_and_runs_cleanup_hook(tmp_path):
     import signal
@@ -272,7 +271,9 @@ time.sleep(30)
             proc.wait(timeout=5)
 
 
-@pytest.mark.skipif(not sys.platform.startswith("linux"), reason="Linux RLIMIT_DATA semantics")
+@pytest.mark.skipif(
+    not sys.platform.startswith("linux"), reason="Linux RLIMIT_DATA semantics"
+)
 def test_real_memory_cap_blocks_large_allocation():
     code = """
 from ai_creator_agent.env.resources import apply_memory_cap, MB
