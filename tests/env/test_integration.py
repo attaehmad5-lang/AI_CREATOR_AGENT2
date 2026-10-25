@@ -229,7 +229,7 @@ def test_real_cli_secret_scan_exit_codes(tmp_path):
         command + [str(clean)], env=child_env(), capture_output=True, timeout=10
     )
     bad = subprocess.run(
-        command + [str(dirty)], env=child_env(), capture_output=True, timeout=10
+        [*command, str(dirty)], env=child_env(), capture_output=True, timeout=10
     )
     assert good.returncode == 0
     assert bad.returncode == 1
@@ -241,7 +241,8 @@ def test_hot_reload_only_changes_allowlisted_environment_values(tmp_path):
 
     env_file = tmp_path / ".env"
     env_file.write_text("LOG_LEVEL=INFO\\nPORT=8000\\n", encoding="utf-8")
-    loader = lambda: load_env_file(env_file, environ={})
+    def loader():
+        return load_env_file(env_file, environ={})
     reloader = HotReloader(loader, loader(), {"LOG_LEVEL"}, watch_files=[env_file])
     env_file.write_text("LOG_LEVEL=DEBUG\\nPORT=9000\\n", encoding="utf-8")
     os.utime(env_file, (time.time() + 5, time.time() + 5))
