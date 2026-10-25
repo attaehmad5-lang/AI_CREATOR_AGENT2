@@ -253,4 +253,4 @@ def test_hot_reload_only_changes_allowlisted_environment_values(tmp_path):
     broken = reloader.poll_once()
     assert broken.error
     assert reloader.get("LOG_LEVEL") == "DEBUG"
-\n
+
