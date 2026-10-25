@@ -47,12 +47,8 @@ jobs:
       - name: Generate or validate dependency lock
         run: |
           python_version="$(tr -d '[:space:]' < .python-version)"
-          if test -f uv.lock; then
-            uv lock --check --python "$python_version"
-          else
-            echo "::warning::uv.lock is absent from the branch; generating a temporary CI lock. Commit the resulting lockfile before merge."
-            uv lock --python "$python_version"
-          fi
+          uv lock --upgrade-package pytest --python "$python_version"
+          uv lock --check --python "$python_version"
       - name: Preserve generated lockfile as CI artifact
         if: always() && hashFiles('uv.lock') != ''
         uses: actions/upload-artifact@v4
