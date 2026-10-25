@@ -63,8 +63,10 @@ def test_shutdown_persists_state_and_orders_hooks(tmp_path):
 
 def test_hook_errors_are_isolated(tmp_path):
     ran = []
+
     def bad():
         raise RuntimeError("x")
+
     c = ShutdownCoordinator(tmp_path / "st.json")
     c.add_hook("bad", bad, 1)
     c.add_hook("good", lambda: ran.append(1), 2)
@@ -83,6 +85,7 @@ def test_shutdown_is_idempotent(tmp_path):
 def test_snapshot_failure_is_recorded(tmp_path):
     def boom():
         raise RuntimeError("no state")
+
     c = ShutdownCoordinator(tmp_path / "st.json", boom)
     c.shutdown("r")
     assert "snapshot_error" in json.loads((tmp_path / "st.json").read_text())["state"]
@@ -114,11 +117,13 @@ def test_second_signal_forces_exit(tmp_path):
 def test_install_requires_main_thread(tmp_path):
     c = ShutdownCoordinator(tmp_path / "st.json")
     errors = []
+
     def attempt():
         try:
             c.install()
         except RuntimeError as exc:
             errors.append(exc)
+
     t = threading.Thread(target=attempt)
     t.start()
     t.join()
@@ -150,7 +155,10 @@ def test_excepthook_persists_then_delegates(tmp_path):
         c.uninstall()
         sys.excepthook = original
     assert seen == [ValueError]
-    assert json.loads((tmp_path / "st.json").read_text())["reason"] == "unhandled:ValueError"
+    assert (
+        json.loads((tmp_path / "st.json").read_text())["reason"]
+        == "unhandled:ValueError"
+    )
 
 
 def test_keyboard_interrupt_does_not_trigger_shutdown(tmp_path):

@@ -28,16 +28,24 @@ from .profiles import (
     resolve_profile,
 )
 
-RELOADABLE_FIELDS: frozenset[str] = frozenset({
-    "log_level", "request_timeout_s", "max_concurrent_jobs",
-    "hot_reload_interval_s", "ram_warn_ratio",
-})
+RELOADABLE_FIELDS: frozenset[str] = frozenset(
+    {
+        "log_level",
+        "request_timeout_s",
+        "max_concurrent_jobs",
+        "hot_reload_interval_s",
+        "ram_warn_ratio",
+    }
+)
 
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_prefix=PREFIX, extra="forbid", frozen=True,
-        case_sensitive=False, validate_default=True,
+        env_prefix=PREFIX,
+        extra="forbid",
+        frozen=True,
+        case_sensitive=False,
+        validate_default=True,
     )
 
     profile: Profile = Profile.DEV
@@ -61,7 +69,14 @@ class Settings(BaseSettings):
     google_api_key: SecretStr | None = None
 
     @classmethod
-    def settings_customise_sources(cls, settings_cls: type[BaseSettings], init_settings: PydanticBaseSettingsSource, env_settings: PydanticBaseSettingsSource, dotenv_settings: PydanticBaseSettingsSource, file_secret_settings: PydanticBaseSettingsSource) -> tuple[PydanticBaseSettingsSource, ...]:
+    def settings_customise_sources(
+        cls,
+        settings_cls: type[BaseSettings],
+        init_settings: PydanticBaseSettingsSource,
+        env_settings: PydanticBaseSettingsSource,
+        dotenv_settings: PydanticBaseSettingsSource,
+        file_secret_settings: PydanticBaseSettingsSource,
+    ) -> tuple[PydanticBaseSettingsSource, ...]:
         return (init_settings,)
 
     @field_validator("data_dir", "tmp_root", mode="after")
@@ -94,7 +109,12 @@ class Settings(BaseSettings):
         return self
 
     @classmethod
-    def from_profile(cls, profile: str | Profile | None = None, root: Path | None = None, environ: Mapping[str, str] | None = None) -> Settings:
+    def from_profile(
+        cls,
+        profile: str | Profile | None = None,
+        root: Path | None = None,
+        environ: Mapping[str, str] | None = None,
+    ) -> Settings:
         env = dict(os.environ if environ is None else environ)
         resolved = resolve_profile(profile, env)
         merged = load_profile_environment(resolved, root or Path("."), env)
@@ -104,7 +124,7 @@ class Settings(BaseSettings):
         for key, raw in merged.items():
             if not key.startswith(PREFIX):
                 continue
-            name = key[len(PREFIX):].lower()
+            name = key[len(PREFIX) :].lower()
             if name == "profile":
                 continue
             if name not in known:

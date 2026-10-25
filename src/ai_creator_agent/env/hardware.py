@@ -83,12 +83,21 @@ def _disabled(value: str | None) -> bool:
     return value is not None and value.strip() in ("", "-1")
 
 
-def _torch_devices(torch: Any, kind: DeviceKind, driver: str | None) -> list[DeviceInfo]:
+def _torch_devices(
+    torch: Any, kind: DeviceKind, driver: str | None
+) -> list[DeviceInfo]:
     found: list[DeviceInfo] = []
     for index in range(int(torch.cuda.device_count())):
         props = torch.cuda.get_device_properties(index)
         found.append(
-            DeviceInfo(kind, str(props.name), index, int(props.total_memory) // _MB, driver, "torch")
+            DeviceInfo(
+                kind,
+                str(props.name),
+                index,
+                int(props.total_memory) // _MB,
+                driver,
+                "torch",
+            )
         )
     return found
 
@@ -103,7 +112,11 @@ def parse_nvidia_smi(output: str) -> list[DeviceInfo]:
             memory: int | None = int(float(parts[1]))
         except ValueError:
             memory = None
-        devices.append(DeviceInfo(DeviceKind.CUDA, parts[0], len(devices), memory, parts[2], "nvidia-smi"))
+        devices.append(
+            DeviceInfo(
+                DeviceKind.CUDA, parts[0], len(devices), memory, parts[2], "nvidia-smi"
+            )
+        )
     return devices
 
 
@@ -115,7 +128,11 @@ def parse_rocminfo(output: str) -> list[DeviceInfo]:
         if text.startswith("Marketing Name:"):
             last_name = text.split(":", 1)[1].strip() or last_name
         elif text.startswith("Device Type:") and "GPU" in text:
-            devices.append(DeviceInfo(DeviceKind.ROCM, last_name, len(devices), None, None, "rocminfo"))
+            devices.append(
+                DeviceInfo(
+                    DeviceKind.ROCM, last_name, len(devices), None, None, "rocminfo"
+                )
+            )
     return devices
 
 
@@ -133,13 +150,21 @@ def detect_cuda(probes: Probes) -> list[DeviceInfo]:
         return []
     if probes.which("nvidia-smi") is None:
         return []
-    output = probes.run(["nvidia-smi", "--query-gpu=name,memory.total,driver_version", "--format=csv,noheader,nounits"])
+    output = probes.run(
+        [
+            "nvidia-smi",
+            "--query-gpu=name,memory.total,driver_version",
+            "--format=csv,noheader,nounits",
+        ]
+    )
     return parse_nvidia_smi(output) if output else []
 
 
 def detect_rocm(probes: Probes) -> list[DeviceInfo]:
     env = probes.environ
-    if _disabled(env.get("HIP_VISIBLE_DEVICES")) or _disabled(env.get("ROCR_VISIBLE_DEVICES")):
+    if _disabled(env.get("HIP_VISIBLE_DEVICES")) or _disabled(
+        env.get("ROCR_VISIBLE_DEVICES")
+    ):
         return []
     torch = probes.torch()
     if torch is not None:
@@ -183,7 +208,9 @@ def detect_devices(probes: Probes | None = None) -> list[DeviceInfo]:
     return devices
 
 
-def select_device(devices: Sequence[DeviceInfo], preference: str = "auto", strict: bool = False) -> tuple[DeviceInfo, str | None]:
+def select_device(
+    devices: Sequence[DeviceInfo], preference: str = "auto", strict: bool = False
+) -> tuple[DeviceInfo, str | None]:
     cpu = next((d for d in devices if d.kind is DeviceKind.CPU), cpu_device())
     if preference == "auto":
         for kind in (DeviceKind.CUDA, DeviceKind.ROCM, DeviceKind.MPS):
@@ -205,10 +232,14 @@ def select_device(devices: Sequence[DeviceInfo], preference: str = "auto", stric
     return cpu, f"requested {preference} unavailable; falling back to cpu"
 
 
-def detect_hardware(preference: str = "auto", strict: bool = False, probes: Probes | None = None) -> HardwareReport:
+def detect_hardware(
+    preference: str = "auto", strict: bool = False, probes: Probes | None = None
+) -> HardwareReport:
     active = probes or Probes()
     devices = detect_devices(active)
     selected, reason = select_device(devices, preference, strict)
     torch = active.torch()
     version = str(getattr(torch, "__version__", "")) or None if torch else None
-    return HardwareReport(tuple(devices), selected, preference, reason, os.cpu_count() or 1, version)
+    return HardwareReport(
+        tuple(devices), selected, preference, reason, os.cpu_count() or 1, version
+    )

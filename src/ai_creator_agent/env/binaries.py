@@ -38,7 +38,12 @@ def _versioned_matches(directory: Path, names: Sequence[str]) -> list[Path]:
     return matches
 
 
-def find_library(stem: str, search_dirs: Sequence[Path] = (), environ: Mapping[str, str] | None = None, system: str | None = None) -> Path | None:
+def find_library(
+    stem: str,
+    search_dirs: Sequence[Path] = (),
+    environ: Mapping[str, str] | None = None,
+    system: str | None = None,
+) -> Path | None:
     env = os.environ if environ is None else environ
     names = platform_lib_names(stem, system)
     override = env.get(f"AI_CREATOR_LIB_{stem.upper().replace('-', '_')}")
@@ -62,7 +67,13 @@ class LoadedLibrary:
     handle: Any
 
 
-def load_library(stem: str, search_dirs: Sequence[Path] = (), environ: Mapping[str, str] | None = None, system: str | None = None, loader: Callable[[str], Any] = ctypes.CDLL) -> LoadedLibrary:
+def load_library(
+    stem: str,
+    search_dirs: Sequence[Path] = (),
+    environ: Mapping[str, str] | None = None,
+    system: str | None = None,
+    loader: Callable[[str], Any] = ctypes.CDLL,
+) -> LoadedLibrary:
     path = find_library(stem, search_dirs, environ, system)
     if path is None:
         raise BinaryResolutionError(f"native library {stem!r} not found")
@@ -91,7 +102,9 @@ def find_extension_module(name: str, search_dirs: Sequence[Path]) -> Path | None
     return None
 
 
-def import_optional(module: str, fallback: str | None = None) -> tuple[ModuleType | None, str | None]:
+def import_optional(
+    module: str, fallback: str | None = None
+) -> tuple[ModuleType | None, str | None]:
     reasons: list[str] = []
     for candidate in (module, fallback):
         if candidate is None:

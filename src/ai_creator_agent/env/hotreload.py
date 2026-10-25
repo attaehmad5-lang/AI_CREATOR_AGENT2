@@ -33,7 +33,14 @@ class ReloadResult:
 class HotReloader:
     """Reload configuration while rejecting changes to non-whitelisted keys."""
 
-    def __init__(self, loader: Callable[[], Mapping[str, Any]], initial: Mapping[str, Any], reloadable: Iterable[str], watch_files: Iterable[Path] = (), poll_interval_s: float = 2.0) -> None:
+    def __init__(
+        self,
+        loader: Callable[[], Mapping[str, Any]],
+        initial: Mapping[str, Any],
+        reloadable: Iterable[str],
+        watch_files: Iterable[Path] = (),
+        poll_interval_s: float = 2.0,
+    ) -> None:
         reloadable_set = frozenset(reloadable)
         unknown = reloadable_set - set(initial)
         if unknown:
@@ -117,7 +124,9 @@ class HotReloader:
         if self._thread is not None and self._thread.is_alive():
             return
         self._stop.clear()
-        self._thread = threading.Thread(target=self._loop, name="hot-reload", daemon=True)
+        self._thread = threading.Thread(
+            target=self._loop, name="hot-reload", daemon=True
+        )
         self._thread.start()
 
     def stop(self) -> None:

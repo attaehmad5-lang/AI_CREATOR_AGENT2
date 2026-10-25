@@ -9,13 +9,19 @@ from ai_creator_agent.env.audit import (
     run_safety,
 )
 
-REPORT = {"dependencies": [
-    {"name": "ok-pkg", "version": "1.0", "vulns": []},
-    {"name": "bad-pkg", "version": "0.1", "vulns": [
-        {"id": "PYSEC-1", "fix_versions": ["0.2"], "aliases": ["CVE-2024-1"]},
-        {"id": "PYSEC-2", "fix_versions": [], "aliases": []},
-    ]},
-]}
+REPORT = {
+    "dependencies": [
+        {"name": "ok-pkg", "version": "1.0", "vulns": []},
+        {
+            "name": "bad-pkg",
+            "version": "0.1",
+            "vulns": [
+                {"id": "PYSEC-1", "fix_versions": ["0.2"], "aliases": ["CVE-2024-1"]},
+                {"id": "PYSEC-2", "fix_versions": [], "aliases": []},
+            ],
+        },
+    ]
+}
 
 
 def test_parse_collects_vulnerabilities():
@@ -45,15 +51,22 @@ def make_runner(uv_code=0, audit_code=0, out="{}"):
         if cmd[0] == "uv":
             return uv_code, "", "uv boom"
         return audit_code, out, "audit boom"
+
     return runner
 
 
 def test_audit_lockfile_clean(tmp_path):
-    assert audit_lockfile(tmp_path, tmp_path / "r.txt", runner=make_runner(out='{"dependencies": []}')).ok
+    assert audit_lockfile(
+        tmp_path, tmp_path / "r.txt", runner=make_runner(out='{"dependencies": []}')
+    ).ok
 
 
 def test_audit_lockfile_reports_vulns_on_exit_1(tmp_path):
-    assert not audit_lockfile(tmp_path, tmp_path / "r.txt", runner=make_runner(audit_code=1, out=json.dumps(REPORT))).ok
+    assert not audit_lockfile(
+        tmp_path,
+        tmp_path / "r.txt",
+        runner=make_runner(audit_code=1, out=json.dumps(REPORT)),
+    ).ok
 
 
 def test_uv_export_failure(tmp_path):

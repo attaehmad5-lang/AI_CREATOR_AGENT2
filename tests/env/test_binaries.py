@@ -11,11 +11,14 @@ from ai_creator_agent.env.binaries import (
 from ai_creator_agent.env.errors import BinaryResolutionError
 
 
-@pytest.mark.parametrize("system,expected", [
-    ("Linux", ["libfoo.so", "foo.so"]),
-    ("Darwin", ["libfoo.dylib", "foo.dylib"]),
-    ("Windows", ["foo.dll", "libfoo.dll"]),
-])
+@pytest.mark.parametrize(
+    "system,expected",
+    [
+        ("Linux", ["libfoo.so", "foo.so"]),
+        ("Darwin", ["libfoo.dylib", "foo.dylib"]),
+        ("Windows", ["foo.dll", "libfoo.dll"]),
+    ],
+)
 def test_platform_names(system, expected):
     assert platform_lib_names("foo", system) == expected
 
@@ -34,7 +37,9 @@ def test_env_override_wins(tmp_path):
 
 def test_env_override_missing_file_raises(tmp_path):
     with pytest.raises(BinaryResolutionError):
-        find_library("foo", [], {"AI_CREATOR_LIB_FOO": str(tmp_path / "gone.so")}, "Linux")
+        find_library(
+            "foo", [], {"AI_CREATOR_LIB_FOO": str(tmp_path / "gone.so")}, "Linux"
+        )
 
 
 def test_search_dir_prefers_exact_over_versioned(tmp_path):
@@ -60,8 +65,10 @@ def test_load_library_uses_loader(tmp_path):
 
 def test_load_library_wraps_oserror(tmp_path):
     (tmp_path / "libfoo.so").write_text("a")
+
     def boom(_path):
         raise OSError("bad ELF header")
+
     with pytest.raises(BinaryResolutionError, match="bad ELF"):
         load_library("foo", [tmp_path], {}, "Linux", loader=boom)
 

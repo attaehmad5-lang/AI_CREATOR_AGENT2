@@ -13,12 +13,17 @@ from ai_creator_agent.env.pyversion import (
 )
 
 
-@pytest.mark.parametrize("text,expected", [("3.11.8", (3, 11, 8)), (" 3.12.0\n", (3, 12, 0)), ("3.10.14", (3, 10, 14))])
+@pytest.mark.parametrize(
+    "text,expected",
+    [("3.11.8", (3, 11, 8)), (" 3.12.0\n", (3, 12, 0)), ("3.10.14", (3, 10, 14))],
+)
 def test_parse_exact_valid(text, expected):
     assert parse_exact_version(text) == expected
 
 
-@pytest.mark.parametrize("text", ["3.11", "3.11.*", "v3.11.8", "3.11.8rc1", "", "3.11.8.1", "three"])
+@pytest.mark.parametrize(
+    "text", ["3.11", "3.11.*", "v3.11.8", "3.11.8rc1", "", "3.11.8.1", "three"]
+)
 def test_parse_exact_rejects_loose_pins(text):
     with pytest.raises(PythonVersionError):
         parse_exact_version(text)
@@ -89,7 +94,9 @@ def test_validate_declared_mismatch_raises(tmp_path):
 
 def test_validate_expected_mismatch_raises(tmp_path):
     with pytest.raises(VirtualEnvError):
-        validate_virtualenv(tmp_path / "x", {}, str(tmp_path / "v"), str(tmp_path / "b"))
+        validate_virtualenv(
+            tmp_path / "x", {}, str(tmp_path / "v"), str(tmp_path / "b")
+        )
 
 
 def test_validate_success_returns_prefix(tmp_path):

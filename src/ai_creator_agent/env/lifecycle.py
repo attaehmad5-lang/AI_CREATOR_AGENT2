@@ -19,7 +19,9 @@ from typing import Any
 
 def atomic_write_json(path: Path, data: Mapping[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    fd, tmp_name = tempfile.mkstemp(prefix=f"{path.name}.", suffix=".tmp", dir=path.parent)
+    fd, tmp_name = tempfile.mkstemp(
+        prefix=f"{path.name}.", suffix=".tmp", dir=path.parent
+    )
     try:
         with os.fdopen(fd, "w", encoding="utf-8") as handle:
             json.dump(data, handle, indent=2, sort_keys=True, default=str)
@@ -63,7 +65,14 @@ Hook = Callable[[], None]
 class ShutdownCoordinator:
     """Persist state and run cleanup hooks once, on signal or unhandled error."""
 
-    def __init__(self, state_path: Path, snapshot: Callable[[], Mapping[str, Any]] = dict, signals: Sequence[signal.Signals] | None = None, force_exit: Callable[[int], Any] = os._exit, clock: Callable[[], float] = time.monotonic) -> None:
+    def __init__(
+        self,
+        state_path: Path,
+        snapshot: Callable[[], Mapping[str, Any]] = dict,
+        signals: Sequence[signal.Signals] | None = None,
+        force_exit: Callable[[int], Any] = os._exit,
+        clock: Callable[[], float] = time.monotonic,
+    ) -> None:
         self.state_path = state_path
         self._snapshot = snapshot
         self._signals = tuple(signals or (signal.SIGTERM, signal.SIGINT))
@@ -109,7 +118,12 @@ class ShutdownCoordinator:
                 state: Mapping[str, Any] = self._snapshot()
             except Exception as exc:
                 state = {"snapshot_error": repr(exc)}
-            payload = {"reason": reason, "pid": os.getpid(), "timestamp": time.time(), "state": dict(state)}
+            payload = {
+                "reason": reason,
+                "pid": os.getpid(),
+                "timestamp": time.time(),
+                "state": dict(state),
+            }
             try:
                 atomic_write_json(self.state_path, payload)
                 saved = True
@@ -117,13 +131,17 @@ class ShutdownCoordinator:
                 saved = False
             ran: list[str] = []
             errors: dict[str, str] = {}
-            for _prio, _order, name, func in sorted(self._hooks, key=lambda item: (item[0], item[1])):
+            for _prio, _order, name, func in sorted(
+                self._hooks, key=lambda item: (item[0], item[1])
+            ):
                 ran.append(name)
                 try:
                     func()
                 except Exception as exc:
                     errors[name] = repr(exc)
-            self._report = ShutdownReport(reason, saved, tuple(ran), errors, self._clock() - started)
+            self._report = ShutdownReport(
+                reason, saved, tuple(ran), errors, self._clock() - started
+            )
             return self._report
 
     def _on_signal(self, signum: int, _frame: FrameType | None) -> None:
@@ -134,7 +152,12 @@ class ShutdownCoordinator:
         self.shutdown(f"signal:{name}")
         raise SystemExit(128 + signum)
 
-    def _on_exception(self, exc_type: type[BaseException], exc: BaseException, tb: TracebackType | None) -> None:
+    def _on_exception(
+        self,
+        exc_type: type[BaseException],
+        exc: BaseException,
+        tb: TracebackType | None,
+    ) -> None:
         previous = self._previous_excepthook or sys.__excepthook__
         if not issubclass(exc_type, KeyboardInterrupt):
             self.shutdown(f"unhandled:{exc_type.__name__}")

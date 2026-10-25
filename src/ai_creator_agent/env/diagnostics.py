@@ -48,7 +48,18 @@ class DiagnosticReport:
         return 0 if self.ok else 1
 
     def to_dict(self) -> dict[str, Any]:
-        return {"ok": self.ok, "results": [{"name": item.name, "status": item.status.value, "message": item.message, "duration_ms": round(item.duration_ms, 2)} for item in self.results]}
+        return {
+            "ok": self.ok,
+            "results": [
+                {
+                    "name": item.name,
+                    "status": item.status.value,
+                    "message": item.message,
+                    "duration_ms": round(item.duration_ms, 2),
+                }
+                for item in self.results
+            ],
+        }
 
     def to_json(self) -> str:
         return json.dumps(self.to_dict(), indent=2)
@@ -100,10 +111,14 @@ class DiagnosticSuite:
 
     def _checks(self) -> list[_Check]:
         return [
-            _Check("python", self._python), _Check("virtualenv", self._venv),
-            _Check("cli", self._cli), _Check("memory", self._memory),
-            _Check("paths", self._paths), _Check("disk", self._disk),
-            _Check("permissions", self._permissions), _Check("hardware", self._hardware),
+            _Check("python", self._python),
+            _Check("virtualenv", self._venv),
+            _Check("cli", self._cli),
+            _Check("memory", self._memory),
+            _Check("paths", self._paths),
+            _Check("disk", self._disk),
+            _Check("permissions", self._permissions),
+            _Check("hardware", self._hardware),
         ]
 
     def run(self, only: Sequence[str] | None = None) -> DiagnosticReport:
@@ -135,7 +150,9 @@ class DiagnosticSuite:
 
     def _cli(self) -> tuple[Status, str]:
         reqs = requirements_for(self.config.runtime)
-        checks = run_preflight(reqs, which=self._which, runner=self._cli_runner, raise_on_fail=False)
+        checks = run_preflight(
+            reqs, which=self._which, runner=self._cli_runner, raise_on_fail=False
+        )
         bad = [c.message for c in checks if not c.ok]
         if bad:
             return Status.FAIL, "; ".join(bad)
@@ -206,7 +223,9 @@ class DiagnosticSuite:
         return level, "; ".join(issues)
 
     def _hardware(self) -> tuple[Status, str]:
-        report = detect_hardware(self.config.device_preference, probes=self.config.probes)
+        report = detect_hardware(
+            self.config.device_preference, probes=self.config.probes
+        )
         label = f"{report.selected.kind.value}: {report.selected.name}"
         accelerated = report.selected.kind.value != "cpu"
         if self.config.require_accelerator and not accelerated:

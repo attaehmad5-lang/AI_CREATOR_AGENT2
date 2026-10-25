@@ -42,7 +42,13 @@ def assert_safe_root(root: Path) -> Path:
 class EphemeralWorkspace:
     """A private 0700 directory that is removed on exit, signal or crash-sweep."""
 
-    def __init__(self, root: Path, prefix: str = "aica-", max_bytes: int | None = None, register_atexit: bool = True) -> None:
+    def __init__(
+        self,
+        root: Path,
+        prefix: str = "aica-",
+        max_bytes: int | None = None,
+        register_atexit: bool = True,
+    ) -> None:
         if not prefix or "/" in prefix or "\\" in prefix:
             raise WorkspaceError(f"invalid prefix {prefix!r}")
         if max_bytes is not None and max_bytes <= 0:
@@ -92,7 +98,9 @@ class EphemeralWorkspace:
         if self.max_bytes is None:
             return
         if self.usage_bytes() + extra_bytes > self.max_bytes:
-            raise WorkspaceError(f"workspace cap of {self.max_bytes} bytes would be exceeded")
+            raise WorkspaceError(
+                f"workspace cap of {self.max_bytes} bytes would be exceeded"
+            )
 
     def cleanup(self) -> bool:
         path, self._path = self._path, None
@@ -108,24 +116,43 @@ class EphemeralWorkspace:
     def __enter__(self) -> Path:
         return self.create()
 
-    def __exit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, tb: TracebackType | None) -> None:
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc: BaseException | None,
+        tb: TracebackType | None,
+    ) -> None:
         self.cleanup()
 
 
-def sweep_stale(root: Path, prefix: str = "aica-", ttl_seconds: float = 86_400.0, clock: Callable[[], float] = time.time, pid_alive: Callable[[int], bool] = _pid_alive) -> list[Path]:
+def sweep_stale(
+    root: Path,
+    prefix: str = "aica-",
+    ttl_seconds: float = 86_400.0,
+    clock: Callable[[], float] = time.time,
+    pid_alive: Callable[[int], bool] = _pid_alive,
+) -> list[Path]:
     """Remove workspaces left behind by crashed processes."""
     if not root.is_dir():
         return []
     assert_safe_root(root)
     removed: list[Path] = []
     for child in sorted(root.iterdir()):
-        if child.is_symlink() or not child.is_dir() or not child.name.startswith(prefix):
+        if (
+            child.is_symlink()
+            or not child.is_dir()
+            or not child.name.startswith(prefix)
+        ):
             continue
         try:
             owner = int((child / MARKER).read_text(encoding="utf-8").strip())
         except (OSError, ValueError):
             owner = None
-        stale = not pid_alive(owner) if owner is not None else clock() - child.stat().st_mtime > ttl_seconds
+        stale = (
+            not pid_alive(owner)
+            if owner is not None
+            else clock() - child.stat().st_mtime > ttl_seconds
+        )
         if stale:
             shutil.rmtree(child, ignore_errors=True)
             if not child.exists():

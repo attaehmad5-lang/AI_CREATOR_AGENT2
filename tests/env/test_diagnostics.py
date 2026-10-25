@@ -15,8 +15,14 @@ RUNNING = ".".join(str(p) for p in sys.version_info[:3])
 
 
 def cpu_probes():
-    return Probes(system=lambda: "Linux", machine=lambda: "x86_64", which=lambda n: None,
-                  run=lambda c: None, torch=lambda: None, environ={})
+    return Probes(
+        system=lambda: "Linux",
+        machine=lambda: "x86_64",
+        which=lambda n: None,
+        run=lambda c: None,
+        torch=lambda: None,
+        environ={},
+    )
 
 
 def pin_file(tmp_path, text=RUNNING):
@@ -26,14 +32,20 @@ def pin_file(tmp_path, text=RUNNING):
 
 
 def suite(tmp_path, free_mb=8000, disk_mb=50_000, **cfg):
-    base = {"pin_file": cfg.pop("pin_file", None) or pin_file(tmp_path),
-            "required_dirs": (tmp_path / "data", tmp_path / "tmp"),
-            "probes": cpu_probes(), "require_venv": False}
+    base = {
+        "pin_file": cfg.pop("pin_file", None) or pin_file(tmp_path),
+        "required_dirs": (tmp_path / "data", tmp_path / "tmp"),
+        "probes": cpu_probes(),
+        "require_venv": False,
+    }
     base.update(cfg)
-    return DiagnosticSuite(DiagnosticConfig(**base),
+    return DiagnosticSuite(
+        DiagnosticConfig(**base),
         memory_reader=lambda: MemorySnapshot(16000 * MB, free_mb * MB, 100 * MB),
         disk_usage=lambda p: SimpleNamespace(free=disk_mb * MB),
-        which=lambda n: f"/usr/bin/{n}", cli_runner=lambda p, a: "tool version 99.0.0")
+        which=lambda n: f"/usr/bin/{n}",
+        cli_runner=lambda p, a: "tool version 99.0.0",
+    )
 
 
 def one(report, name):
@@ -47,17 +59,29 @@ def test_healthy_system_passes(tmp_path):
 
 
 def test_python_pin_mismatch_fails(tmp_path):
-    assert one(suite(tmp_path, pin_file=pin_file(tmp_path, "2.7.18")).run(), "python").status is Status.FAIL
+    assert (
+        one(
+            suite(tmp_path, pin_file=pin_file(tmp_path, "2.7.18")).run(), "python"
+        ).status
+        is Status.FAIL
+    )
 
 
 def test_python_patch_drift_tolerated_when_not_strict(tmp_path):
     major, minor, patch = sys.version_info[:3]
-    s = suite(tmp_path, pin_file=pin_file(tmp_path, f"{major}.{minor}.{patch + 1}"), strict_patch=False)
+    s = suite(
+        tmp_path,
+        pin_file=pin_file(tmp_path, f"{major}.{minor}.{patch + 1}"),
+        strict_patch=False,
+    )
     assert one(s.run(), "python").status is Status.PASS
 
 
 def test_missing_pin_file_is_failure_not_crash(tmp_path):
-    assert one(suite(tmp_path, pin_file=tmp_path / "absent").run(), "python").status is Status.FAIL
+    assert (
+        one(suite(tmp_path, pin_file=tmp_path / "absent").run(), "python").status
+        is Status.FAIL
+    )
 
 
 def test_venv_not_required_warns_or_passes(tmp_path):
@@ -66,8 +90,12 @@ def test_venv_not_required_warns_or_passes(tmp_path):
 
 def test_venv_required_fails_outside_venv(tmp_path, monkeypatch):
     import ai_creator_agent.env.diagnostics as diag
+
     monkeypatch.setattr(diag, "in_virtualenv", lambda: False)
-    assert one(suite(tmp_path, require_venv=True).run(), "virtualenv").status is Status.FAIL
+    assert (
+        one(suite(tmp_path, require_venv=True).run(), "virtualenv").status
+        is Status.FAIL
+    )
 
 
 def test_memory_fail_below_minimum(tmp_path):
@@ -94,7 +122,10 @@ def test_paths_created_and_writable(tmp_path):
 
 
 def test_paths_missing_not_created_fails(tmp_path):
-    assert one(suite(tmp_path, create_missing_dirs=False).run(), "paths").status is Status.FAIL
+    assert (
+        one(suite(tmp_path, create_missing_dirs=False).run(), "paths").status
+        is Status.FAIL
+    )
 
 
 def test_paths_file_in_place_of_directory(tmp_path):
@@ -131,11 +162,17 @@ def test_permissions_secret_file_levels(tmp_path):
     secret = tmp_path / ".env"
     secret.write_text("A=1")
     os.chmod(secret, 0o644)
-    assert one(suite(tmp_path, secret_files=(secret,)).run(), "permissions").status is Status.WARN
+    assert (
+        one(suite(tmp_path, secret_files=(secret,)).run(), "permissions").status
+        is Status.WARN
+    )
     strict = suite(tmp_path, secret_files=(secret,), strict_permissions=True)
     assert one(strict.run(), "permissions").status is Status.FAIL
     os.chmod(secret, 0o600)
-    assert one(suite(tmp_path, secret_files=(secret,)).run(), "permissions").status is Status.PASS
+    assert (
+        one(suite(tmp_path, secret_files=(secret,)).run(), "permissions").status
+        is Status.PASS
+    )
 
 
 @pytest.mark.skipif(os.name != "posix", reason="posix modes")
@@ -151,11 +188,17 @@ def test_hardware_cpu_only_passes(tmp_path):
 
 
 def test_hardware_required_accelerator_fails(tmp_path):
-    assert one(suite(tmp_path, require_accelerator=True).run(), "hardware").status is Status.FAIL
+    assert (
+        one(suite(tmp_path, require_accelerator=True).run(), "hardware").status
+        is Status.FAIL
+    )
 
 
 def test_hardware_unavailable_preference_warns(tmp_path):
-    assert one(suite(tmp_path, device_preference="cuda").run(), "hardware").status is Status.WARN
+    assert (
+        one(suite(tmp_path, device_preference="cuda").run(), "hardware").status
+        is Status.WARN
+    )
 
 
 def test_cli_missing_tools_fail(tmp_path):

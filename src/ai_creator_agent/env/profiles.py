@@ -33,14 +33,28 @@ def _defaults(**values: str) -> dict[str, str]:
 
 
 PROFILE_DEFAULTS: dict[Profile, dict[str, str]] = {
-    Profile.DEV: _defaults(log_level="DEBUG", debug="true", max_ram_mb="8192", hot_reload_enabled="true"),
-    Profile.TEST: _defaults(log_level="WARNING", debug="false", max_ram_mb="2048", tmp_ttl_seconds="60", hot_reload_enabled="false"),
-    Profile.STAGING: _defaults(log_level="INFO", debug="false", max_ram_mb="16384", hot_reload_enabled="true"),
-    Profile.PROD: _defaults(log_level="INFO", debug="false", max_ram_mb="32768", hot_reload_enabled="true"),
+    Profile.DEV: _defaults(
+        log_level="DEBUG", debug="true", max_ram_mb="8192", hot_reload_enabled="true"
+    ),
+    Profile.TEST: _defaults(
+        log_level="WARNING",
+        debug="false",
+        max_ram_mb="2048",
+        tmp_ttl_seconds="60",
+        hot_reload_enabled="false",
+    ),
+    Profile.STAGING: _defaults(
+        log_level="INFO", debug="false", max_ram_mb="16384", hot_reload_enabled="true"
+    ),
+    Profile.PROD: _defaults(
+        log_level="INFO", debug="false", max_ram_mb="32768", hot_reload_enabled="true"
+    ),
 }
 
 
-def resolve_profile(value: str | Profile | None = None, environ: Mapping[str, str] | None = None) -> Profile:
+def resolve_profile(
+    value: str | Profile | None = None, environ: Mapping[str, str] | None = None
+) -> Profile:
     """Resolve explicit value > AI_CREATOR_PROFILE > dev."""
     if isinstance(value, Profile):
         return value
@@ -62,7 +76,9 @@ def profile_env_files(profile: Profile, root: Path) -> list[Path]:
     return files
 
 
-def load_profile_environment(profile: Profile, root: Path, environ: Mapping[str, str] | None = None) -> dict[str, str]:
+def load_profile_environment(
+    profile: Profile, root: Path, environ: Mapping[str, str] | None = None
+) -> dict[str, str]:
     """defaults < files < real process environment (AI_CREATOR_* only)."""
     env = os.environ if environ is None else environ
     merged: dict[str, str] = dict(PROFILE_DEFAULTS[profile])
@@ -70,7 +86,9 @@ def load_profile_environment(profile: Profile, root: Path, environ: Mapping[str,
         try:
             merged.update(load_env_file(path, environ=env, missing_ok=True))
         except EnvFileError as exc:
-            raise ConfigError(f"invalid profile environment file {path}: {exc}") from exc
+            raise ConfigError(
+                f"invalid profile environment file {path}: {exc}"
+            ) from exc
     for key, value in env.items():
         if key.startswith(PREFIX):
             merged[key] = value

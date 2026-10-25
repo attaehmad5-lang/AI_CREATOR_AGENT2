@@ -18,7 +18,11 @@ def test_rejects_nonpositive_poll_interval():
 
 def test_only_allowlisted_values_change_and_subscribers_notified():
     changes = []
-    r = HotReloader(lambda: {"timeout": 5, "secret": "new"}, {"timeout": 1, "secret": "old"}, {"timeout"})
+    r = HotReloader(
+        lambda: {"timeout": 5, "secret": "new"},
+        {"timeout": 1, "secret": "old"},
+        {"timeout"},
+    )
     r.subscribe(lambda event: changes.append(dict(event)))
     result = r.reload()
     assert result.changed and result.applied["timeout"] == (1, 5)
@@ -28,7 +32,9 @@ def test_only_allowlisted_values_change_and_subscribers_notified():
 
 
 def test_loader_failure_keeps_previous_configuration():
-    r = HotReloader(lambda: (_ for _ in ()).throw(RuntimeError("bad config")), {"x": 1}, {"x"})
+    r = HotReloader(
+        lambda: (_ for _ in ()).throw(RuntimeError("bad config")), {"x": 1}, {"x"}
+    )
     result = r.reload()
     assert result.error and r.get("x") == 1
 
@@ -65,8 +71,15 @@ def test_poll_once_only_reloads_when_signature_changes(tmp_path):
 
 
 def test_watched_env_files_profile_rules(tmp_path):
-    assert [p.name for p in watched_env_files(tmp_path, "prod")] == [".env", ".env.prod"]
-    assert [p.name for p in watched_env_files(tmp_path, "dev")] == [".env", ".env.dev", ".env.local"]
+    assert [p.name for p in watched_env_files(tmp_path, "prod")] == [
+        ".env",
+        ".env.prod",
+    ]
+    assert [p.name for p in watched_env_files(tmp_path, "dev")] == [
+        ".env",
+        ".env.dev",
+        ".env.local",
+    ]
 
 
 def test_start_stop_is_idempotent():

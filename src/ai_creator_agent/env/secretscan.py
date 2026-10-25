@@ -16,9 +16,37 @@ from .errors import SecretLeakError
 ALLOW_PRAGMA = "secret-scan: allow"
 MAX_FILE_BYTES = 1_000_000
 MAX_LINE_CHARS = 20_000
-SKIP_DIRS = frozenset({".git", ".venv", "venv", "node_modules", "__pycache__", ".mypy_cache"})
-FORBIDDEN_NAMES = (".env", ".env.local", ".env.dev", ".env.test", ".env.staging", ".env.prod", "*.pem", "*.p12", "id_rsa", "id_ed25519")
-PLACEHOLDER_HINTS = ("example", "changeme", "change_me", "placeholder", "your_", "your-", "dummy", "sample", "xxxx", "****", "<", "${", "todo", "redacted")
+SKIP_DIRS = frozenset(
+    {".git", ".venv", "venv", "node_modules", "__pycache__", ".mypy_cache"}
+)
+FORBIDDEN_NAMES = (
+    ".env",
+    ".env.local",
+    ".env.dev",
+    ".env.test",
+    ".env.staging",
+    ".env.prod",
+    "*.pem",
+    "*.p12",
+    "id_rsa",
+    "id_ed25519",
+)
+PLACEHOLDER_HINTS = (
+    "example",
+    "changeme",
+    "change_me",
+    "placeholder",
+    "your_",
+    "your-",
+    "dummy",
+    "sample",
+    "xxxx",
+    "****",
+    "<",
+    "${",
+    "todo",
+    "redacted",
+)
 
 
 @dataclass(frozen=True)
@@ -29,7 +57,9 @@ class SecretRule:
     group: int = 0
 
 
-def _rule(name: str, regex: str, entropy: float | None = None, group: int = 0) -> SecretRule:
+def _rule(
+    name: str, regex: str, entropy: float | None = None, group: int = 0
+) -> SecretRule:
     return SecretRule(name, re.compile(regex), entropy, group)
 
 
@@ -43,7 +73,12 @@ RULES: tuple[SecretRule, ...] = (
     _rule("openai-key", r"\bsk-(?:proj-)?[A-Za-z0-9_\-]{20,}"),
     _rule("stripe-key", r"\b[sr]k_live_[0-9A-Za-z]{24,}\b"),
     _rule("jwt", r"\beyJ[A-Za-z0-9_-]{8,}\.eyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}"),
-    _rule("generic-assignment", r"(?i)[\w.-]*(?:api[_-]?key|secret|token|passw(?:or)?d|credential)[\w.-]*\s*[:=]\s*[\"']?([A-Za-z0-9/+=_\-]{16,})[\"']?", 3.5, 1),
+    _rule(
+        "generic-assignment",
+        r"(?i)[\w.-]*(?:api[_-]?key|secret|token|passw(?:or)?d|credential)[\w.-]*\s*[:=]\s*[\"']?([A-Za-z0-9/+=_\-]{16,})[\"']?",
+        3.5,
+        1,
+    ),
 )
 
 
@@ -85,7 +120,11 @@ def scan_text(text: str, path: str = "<memory>") -> list[Finding]:
                     continue
                 value = match.group(rule.group)
                 if rule.min_entropy is not None:
-                    if shannon_entropy(value) < rule.min_entropy or value.isalpha() or _is_placeholder(value):
+                    if (
+                        shannon_entropy(value) < rule.min_entropy
+                        or value.isalpha()
+                        or _is_placeholder(value)
+                    ):
                         continue
                 elif _is_placeholder(value) and rule.name != "private-key":
                     continue
@@ -143,7 +182,9 @@ GitRunner = Callable[[Sequence[str]], str]
 
 
 def _git(args: Sequence[str]) -> str:
-    proc = subprocess.run(["git", *args], capture_output=True, text=True, check=False, timeout=30)
+    proc = subprocess.run(
+        ["git", *args], capture_output=True, text=True, check=False, timeout=30
+    )
     if proc.returncode != 0:
         raise SecretLeakError(f"git {' '.join(args)} failed: {proc.stderr.strip()}")
     return proc.stdout
@@ -165,4 +206,6 @@ def scan_git(mode: str, runner: GitRunner = _git) -> list[Finding]:
 
 
 def format_findings(findings: Sequence[Finding]) -> str:
-    return "\n".join(f"{item.path}:{item.line}: [{item.rule}] {item.snippet}" for item in findings)
+    return "\n".join(
+        f"{item.path}:{item.line}: [{item.rule}] {item.snippet}" for item in findings
+    )

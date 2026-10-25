@@ -56,7 +56,9 @@ def test_env_files_prod_excludes_local(tmp_path):
 
 
 def test_precedence_defaults_files_process(tmp_path):
-    (tmp_path / ".env").write_text("AI_CREATOR_LOG_LEVEL=ERROR\nAI_CREATOR_DEBUG=true\n")
+    (tmp_path / ".env").write_text(
+        "AI_CREATOR_LOG_LEVEL=ERROR\nAI_CREATOR_DEBUG=true\n"
+    )
     (tmp_path / ".env.prod").write_text("AI_CREATOR_LOG_LEVEL=CRITICAL\n")
     env = {"AI_CREATOR_DEBUG": "false"}
     merged = load_profile_environment(Profile.PROD, tmp_path, env)

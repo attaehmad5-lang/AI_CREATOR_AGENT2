@@ -23,7 +23,9 @@ def test_parse_nvidia_smi():
 
 
 def test_parse_rocminfo():
-    devices = parse_rocminfo("Marketing Name: AMD MI210\nDevice Type: GPU\nDevice Type: CPU")
+    devices = parse_rocminfo(
+        "Marketing Name: AMD MI210\nDevice Type: GPU\nDevice Type: CPU"
+    )
     assert len(devices) == 1 and devices[0].name == "AMD MI210"
 
 
@@ -33,22 +35,37 @@ def test_visible_devices_can_disable_cuda():
 
 
 def test_cuda_fallback_to_nvidia_smi():
-    p = Probes(torch=lambda: None, which=lambda n: "/usr/bin/nvidia-smi" if n == "nvidia-smi" else None,
-               run=lambda cmd: "NVIDIA A10, 23028, 550.54")
+    p = Probes(
+        torch=lambda: None,
+        which=lambda n: "/usr/bin/nvidia-smi" if n == "nvidia-smi" else None,
+        run=lambda cmd: "NVIDIA A10, 23028, 550.54",
+    )
     assert detect_cuda(p)[0].kind is DeviceKind.CUDA
 
 
 def test_rocm_fallback_to_rocminfo():
-    p = Probes(torch=lambda: None, which=lambda n: "/usr/bin/rocminfo" if n == "rocminfo" else None,
-               run=lambda cmd: "Marketing Name: MI210\nDevice Type: GPU")
+    p = Probes(
+        torch=lambda: None,
+        which=lambda n: "/usr/bin/rocminfo" if n == "rocminfo" else None,
+        run=lambda cmd: "Marketing Name: MI210\nDevice Type: GPU",
+    )
     assert detect_rocm(p)[0].kind is DeviceKind.ROCM
 
 
 def test_mps_only_on_apple_silicon():
-    p = Probes(system=lambda: "Darwin", machine=lambda: "arm64", torch=lambda: None,
-               run=lambda cmd: "Apple M2")
+    p = Probes(
+        system=lambda: "Darwin",
+        machine=lambda: "arm64",
+        torch=lambda: None,
+        run=lambda cmd: "Apple M2",
+    )
     assert detect_mps(p)[0].kind is DeviceKind.MPS
-    assert detect_mps(Probes(system=lambda: "Linux", machine=lambda: "x86_64", torch=lambda: None)) == []
+    assert (
+        detect_mps(
+            Probes(system=lambda: "Linux", machine=lambda: "x86_64", torch=lambda: None)
+        )
+        == []
+    )
 
 
 def test_auto_prefers_accelerator():
@@ -76,7 +93,12 @@ def test_unknown_preference():
 
 
 def test_detect_hardware_report_uses_cpu_fallback():
-    p = Probes(system=lambda: "Linux", machine=lambda: "x86_64", torch=lambda: None,
-               which=lambda _name: None, environ={})
+    p = Probes(
+        system=lambda: "Linux",
+        machine=lambda: "x86_64",
+        torch=lambda: None,
+        which=lambda _name: None,
+        environ={},
+    )
     report = detect_hardware(probes=p)
     assert report.selected.kind is DeviceKind.CPU and report.cpu_count >= 1
