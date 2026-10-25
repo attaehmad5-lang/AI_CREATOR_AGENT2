@@ -64,6 +64,7 @@ print(path, flush=True)
     assert created.is_absolute()
     assert not created.exists()
 
+
 @pytest.mark.skipif(os.name != "posix", reason="POSIX signal semantics")
 def test_sigterm_child_persists_state_and_runs_cleanup_hook(tmp_path):
     import signal
@@ -237,6 +238,7 @@ def test_hot_reload_only_changes_allowlisted_environment_values(tmp_path):
     assert broken.error
     assert reloader.get("LOG_LEVEL") == "DEBUG"
 
+
 @pytest.mark.skipif(os.name != "posix", reason="POSIX signal semantics")
 def test_second_signal_force_exits_during_slow_cleanup(tmp_path):
     state = tmp_path / "state.json"
@@ -297,7 +299,9 @@ except MemoryError:
     assert proc.stdout.strip() == "blocked 300", proc.stdout + proc.stderr
 
 
-@pytest.mark.skipif(not sys.platform.startswith("linux"), reason="Linux RLIMIT_DATA semantics")
+@pytest.mark.skipif(
+    not sys.platform.startswith("linux"), reason="Linux RLIMIT_DATA semantics"
+)
 def test_real_memory_cap_cannot_be_raised_again():
     code = """
 import resource
