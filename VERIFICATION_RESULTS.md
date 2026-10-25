@@ -1,26 +1,36 @@
 # Verification Results
 
-Status: **NOT READY TO MERGE**
+Status: **NOT READY TO MERGE — source parity remains open**
 
-## Current branch verification
+## Latest CI verification
 
-- A pinned-toolchain dependency lockfile has now been generated on GitHub Actions and committed as `uv.lock` on `env-suite`.
-- Ruff lint: **PASS** on run 76.
-- Ruff format check: **PASS** on run 76 (37 files already formatted).
-- Strict mypy: **PASS** on run 76 (19 source files).
-- Pytest: **PASS** on run 76 — 294 passed; total coverage 90.13%, above the 80% gate.
-- Secret scan: **FAIL** on run 76 because its own generic-assignment fixture was detected in `tests/env/test_secretscan.py`. The fixture was changed to assemble the assignment from adjacent string fragments so the scanner still tests the same input without self-detecting the source. A fresh workflow run is pending; this fix is not yet verified.
-- Container job: **NOT VERIFIED**; it was skipped because the verify job failed at the secret scan.
-- Latest workflow: [run 79](https://github.com/attaehmad5-lang/AI_CREATOR_AGENT2/actions/runs/40154658914). It is pending and must finish before the current branch can be considered verified.
+Verified commit: `adfdc2316512899bf5bb3eecaacebcdef99d32b9`
+Latest successful workflow: [run 82](https://github.com/attaehmad5-lang/AI_CREATOR_AGENT2/actions/runs/40154876127)
+
+- Ruff lint: **PASS**
+- Ruff format: **PASS**
+- Strict mypy: **PASS** (19 source files)
+- Pytest: **PASS** — 294 passed; 90.13% total coverage
+- Tracked-secret scan: **PASS**
+- Dependency vulnerability audit: **PASS** after upgrading pytest to 9.0.3+
+- Container test stage: **PASS**
+- Hardened runtime Docker build: **PASS**
+- Pinned Python runtime / ffmpeg diagnostics: **PASS**
+
+The checked-in `uv.lock` is present on `env-suite`. The CI job currently runs `uv lock --upgrade-package pytest` before `uv lock --check`; this means CI may update the lock rather than purely validate the committed lock. A clean-checkout deterministic lock validation is still required before merge.
 
 ## Source parity and scope
 
-The branch remains a partial import of the supplied project archive. The archived integration test and several source modules are more comprehensive than the reconstructed branch versions. Passing the current branch tests does not prove parity with the original archive or production readiness. Reconcile the intended source against the supplied archive and rerun the complete suite before merge.
+The supplied archive `ai_creator_agent_project_preflight_fixed2.zip` contains more comprehensive tests and implementation coverage than this branch in at least one confirmed area:
+- Archive `tests/env/test_integration.py`: 262 lines / 8,371 bytes.
+- Branch `tests/env/test_integration.py`: 101 lines / 3,150 bytes.
+
+The archive integration suite explicitly covers real subprocesses, signals, resource limits, atexit handling, crash behavior, CLI behavior, stale ephemeral cleanup, and memory-guard behavior. The branch's passing 294-test suite therefore does **not** establish full archive parity or production readiness. Source and test reconciliation is still an open blocker; do not merge or label the overall project complete based only on the green CI run.
 
 ## Remaining merge blockers
 
-1. Verify the secret-scan fixture fix in a fresh GitHub Actions run.
-2. Complete all CI quality/security gates and the container test/build jobs.
-3. Reconcile source and test parity with the supplied project archive; add back missing behaviors/tests rather than treating the current 294-test suite as complete.
-4. Review the generated `uv.lock` on the pinned Python/uv toolchain and ensure `uv lock --check` passes from a clean checkout.
-5. Keep PR #1 as Draft until every required gate passes. Do not merge based only on the 294 passing pytest tests.
+1. Reconcile the original archive's implementation and test coverage with `env-suite`, prioritizing the shortened integration suite and any missing scenarios.
+2. Run the expanded tests on the pinned toolchain; fix regressions rather than weakening assertions.
+3. Change lock handling so CI validates the committed `uv.lock` from a clean checkout without silently upgrading it, then regenerate and commit the lock intentionally when dependencies change.
+4. Rerun every quality/security gate and the container test/build jobs after the parity changes.
+5. Keep PR #1 in Draft until all blockers are resolved.
