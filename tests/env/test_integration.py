@@ -199,9 +199,9 @@ def test_real_cli_secret_scan_exit_codes(tmp_path):
     dirty = tmp_path / "dirty"
     clean.mkdir()
     dirty.mkdir()
-    (clean / "plain.py").write_text("value = 1\\n", encoding="utf-8")
+    (clean / "plain.py").write_text("value = 1\n", encoding="utf-8")
     (dirty / "credential.py").write_text(
-        "key = '" + "AKIA" + "ZQ4M7XK2PL9TB3WN" + "'\\n", encoding="utf-8"
+        "key = '" + "AKIA" + "ZQ4M7XK2PL9TB3WN" + "'\n", encoding="utf-8"
     )
     command = [sys.executable, "-m", "ai_creator_agent.env", "scan-secrets"]
     good = subprocess.run(
@@ -219,19 +219,19 @@ def test_hot_reload_only_changes_allowlisted_environment_values(tmp_path):
     from ai_creator_agent.env.hotreload import HotReloader
 
     env_file = tmp_path / ".env"
-    env_file.write_text("LOG_LEVEL=INFO\\nPORT=8000\\n", encoding="utf-8")
+    env_file.write_text("LOG_LEVEL=INFO\nPORT=8000\n", encoding="utf-8")
 
     def loader():
         return load_env_file(env_file, environ={})
 
     reloader = HotReloader(loader, loader(), {"LOG_LEVEL"}, watch_files=[env_file])
-    env_file.write_text("LOG_LEVEL=DEBUG\\nPORT=9000\\n", encoding="utf-8")
+    env_file.write_text("LOG_LEVEL=DEBUG\nPORT=9000\n", encoding="utf-8")
     os.utime(env_file, (time.time() + 5, time.time() + 5))
     result = reloader.poll_once()
     assert reloader.get("LOG_LEVEL") == "DEBUG"
     assert reloader.get("PORT") == "8000"
     assert result.rejected == ("PORT",)
-    env_file.write_text('LOG_LEVEL="unterminated\\n', encoding="utf-8")
+    env_file.write_text('LOG_LEVEL="unterminated\n', encoding="utf-8")
     os.utime(env_file, (time.time() + 10, time.time() + 10))
     broken = reloader.poll_once()
     assert broken.error
