@@ -4,10 +4,10 @@ Status: **PASS — PR #1 merged; post-merge CI confirmed**
 
 ## Exact verified revision
 
-- Main branch commit: `551e3dbc74247c0c72e36cda9344aab4156a6a33`
-- Successful full CI run: [40208627803](https://github.com/attaehmad5-lang/AI_CREATOR_AGENT2/actions/runs/40208627803)
+- Main branch code commit: `4b3f87b7506623421358466b8572ba8a5d513d7b`
+- Successful full CI run: [40226004104](https://github.com/attaehmad5-lang/AI_CREATOR_AGENT2/actions/runs/40226004104)
 - Both CI jobs completed successfully: `verify` and `container`.
-- PR #1 was merged on 2026-10-25. The earlier post-merge run was cancelled; run 40208627803 is the successful post-merge confirmation.
+- PR #1 was merged on 2026-10-25. This is the latest successful full workflow on `main`; any later documentation-only update does not change the tested source.
 
 ## CI evidence for the verified revision
 
