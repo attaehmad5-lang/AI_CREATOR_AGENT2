@@ -91,7 +91,6 @@ def test_start_stop_is_idempotent():
     assert r._thread is None
 
 
-
 def test_poll_once_handles_deleted_watch_file(tmp_path):
     watched = tmp_path / "config.env"
     watched.write_text("x=1")
