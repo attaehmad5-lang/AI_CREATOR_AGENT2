@@ -4,8 +4,8 @@ Status: **NOT READY TO MERGE — source parity against the supplied archive rema
 
 ## Latest CI verification
 
-Verified commit: `503e7e04280e472b2704e0bb5f7cecd191fbd64e`
-Latest successful workflow: [run 40181568375](https://github.com/attaehmad5-lang/AI_CREATOR_AGENT2/actions/runs/40181568375)
+Verified commit: `a755524c77bcff40bddf8b0e1c264b92577e9384`
+Latest successful workflow: [run 40181912475](https://github.com/attaehmad5-lang/AI_CREATOR_AGENT2/actions/runs/40181912475)
 
 - Ruff lint: **PASS**
 - Ruff format: **PASS**
@@ -21,6 +21,8 @@ These results apply to the current branch at the verified commit and do not esta
 
 ## Source parity and scope
 
+A static inventory comparison confirms that all top-level functions, classes, and class methods from the supplied archive exist in the 18 corresponding branch source modules. The expanded branch suite now has the same total test count as the archive baseline, with 326 passing in CI. This confirms API-name coverage, but does not replace a semantic review of all implementation-level differences.
+
 The supplied archive `ai_creator_agent_project_preflight_fixed2.zip` contains more comprehensive tests and implementation coverage than this branch in at least one confirmed area:
 - Archive `tests/env/test_integration.py`: 262 lines / 8,371 bytes.
 - Branch integration tests were expanded and now cover shutdown-state persistence, signal handling, normal workspace cleanup, crash recovery/stale cleanup, and a real memory-guard scenario. Full archive parity is **not yet demonstrated**.
@@ -29,12 +31,12 @@ The branch now includes real-process tests for second-signal force exit, OS memo
 
 ## Dependency lock verification
 
-The committed `uv.lock` has been updated to match the declared `pytest>=9.0.3,<10` development constraint. CI now runs `uv lock --check --python "$python_version"` on the checked-in file and does not upgrade or rewrite it. The lock-validation change still needs its own clean CI pass before it is considered verified.
+The committed `uv.lock` now matches the declared `pytest>=9.0.3,<10` development constraint. The successful clean CI run validates it with `uv lock --check --python "$python_version"` without upgrading or rewriting it.
 
 ## Remaining merge blockers
 
-1. Complete file-by-file functional reconciliation of the supplied archive with `env-suite`, including any source-module behavior differences beyond the expanded tests already ported.
-2. Run all quality/security gates and container test/build jobs after the final parity changes.
+1. Finish semantic review of implementation-level differences from the supplied archive; matching API names and passing tests do not alone prove every behavior is identical.
+2. Rerun all quality/security gates and container test/build jobs after any source-parity changes.
 3. Keep PR #1 in Draft until all blockers are resolved.
 
 ## Remaining merge blockers
