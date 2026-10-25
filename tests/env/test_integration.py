@@ -162,7 +162,11 @@ os._exit(9)
 
 @pytest.mark.skipif(not sys.platform.startswith("linux"), reason="Linux /proc and RLIMIT semantics")
 def test_real_memory_snapshot_and_guard_detect_growth():
-    from ai_creator_agent.env.resources import GuardState, MemoryGuard, read_memory_snapshot
+    from ai_creator_agent.env.resources import (
+        GuardState,
+        MemoryGuard,
+        read_memory_snapshot,
+    )
 
     before = read_memory_snapshot()
     assert before.total_bytes > 0
