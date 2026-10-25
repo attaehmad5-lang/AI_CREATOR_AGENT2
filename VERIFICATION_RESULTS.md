@@ -4,16 +4,16 @@ Status: **NOT READY TO MERGE — source parity and deterministic lock validation
 
 ## Latest CI verification
 
-Verified commit: `a547ed53047c1bb6501964dea0bfb885bd987220`
-Latest successful workflow: [run 40179045719](https://github.com/attaehmad5-lang/AI_CREATOR_AGENT2/actions/runs/40179045719)
+Verified commit: `8674aaacba4a69804e4e85e7ad674dd6c4096698`
+Latest successful workflow: [run 40180709021](https://github.com/attaehmad5-lang/AI_CREATOR_AGENT2/actions/runs/40180709021)
 
 - Ruff lint: **PASS**
 - Ruff format: **PASS**
 - Strict mypy: **PASS** (19 source files)
-- Pytest: **PASS** — 298 passed; 90.99% total coverage
+- Pytest: **PASS** — 305 passed; 91.49% total coverage (CI verify job)
 - Tracked-secret scan: **PASS**
 - Dependency vulnerability audit: **PASS** (audit reported clean)
-- Container test stage: **PASS**
+- Container test stage: **PASS** (303 passed, 1 skipped in the container stage)
 - Hardened runtime Docker build: **PASS**
 - Pinned Python 3.11.8 runtime and ffmpeg diagnostics: **PASS**
 
