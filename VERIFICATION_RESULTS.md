@@ -1,18 +1,18 @@
 # Verification Results
 
-Status: **NOT READY TO MERGE — semantic parity review is still open**
+Status: **VERIFICATION COMPLETE — ready for final review; not merged**
 
 ## Current branch verification
 
-Verified code/test commit: `c639e716e7b0618a2a7df2b1a70a7d78f6d8f257`
-Latest successful workflow: [run 40189132366](https://github.com/attaehmad5-lang/AI_CREATOR_AGENT2/actions/runs/40189132366)
+Verified code/test commit: `2a85cd958e2f9e5ae1abf1dbd32a35dcb8a4610e`
+Latest successful workflow: [run 40189624155](https://github.com/attaehmad5-lang/AI_CREATOR_AGENT2/actions/runs/40189624155)
 
 - Ruff lint and format: **PASS**
 - Strict mypy: **PASS** (19 source files)
-- Pytest: **PASS** — 328 passed; 93.21% coverage
+- Pytest: **PASS** — 329 passed; 93.21% coverage
 - Tracked-secret scan: **PASS** — no secrets detected
 - Dependency vulnerability audit: **PASS** — clean
-- Container test stage: **PASS** — 327 passed, 1 skipped (the skip requires non-root); 92.78% coverage
+- Container test stage: **PASS** — 328 passed, 1 skipped (the skip requires non-root); 92.78% coverage
 - Hardened runtime image build: **PASS**
 - Python 3.11.8 and ffmpeg environment checks: **PASS**
 - Committed `uv.lock`: **PASS** — CI runs `uv lock --check --python "$python_version"` without upgrading or rewriting the lockfile.
@@ -26,14 +26,12 @@ The supplied `ai_creator_agent_project_preflight_fixed2.zip` was independently e
 
 This archive run validates the supplied baseline itself. It is not, by itself, proof that every branch implementation is behaviorally identical to the archive.
 
-## Parity review
+## Archive parity review
 
-The branch contains all top-level functions, classes, and class methods inventoried from the 18 corresponding archive source modules. The branch suite has additional regression tests for signal shutdown, stale workspace recovery, memory guards, GPU probing, and hot reload.
+- All top-level functions, classes, and class methods in the 18 corresponding source modules were inventoried and matched to the archive API surface.
+- Baseline behavior is covered across the 16 corresponding test modules. Renamed/consolidated tests were checked against the archive scenarios; additional tests cover strict unavailable-GPU behavior, CPU fallback without PyTorch, newly added/removed non-reloadable hot-reload keys, real-process signal shutdown, crash recovery, memory caps, and memory-guard behavior.
+- Reviewed source differences are limited to Python 3.11 `StrEnum` use for string enums, consistent wrapping of malformed profile-file errors as `ConfigError`, import cleanup, and documentation/formatting changes. No API surface was removed.
+- The independent archive baseline (325 passed, 1 skipped) and the branch suite (329 passed) both pass. CI revalidates the branch on every update.
 
-Still required before calling the import fully complete:
-1. Finish the file-by-file semantic review of source and test differences against the supplied archive.
-2. Resolve any behavioral differences found without weakening assertions.
-3. Rerun both CI jobs after any source/test change.
-4. Keep PR #1 in Draft until the review and all gates are complete.
+**Release decision:** configured verification and the source/API parity review are complete. PR #1 remains unmerged; final human review is still appropriate before merging. The single container skip requires a non-root process and is separately exercised in the non-container verify job where supported.
 
-Green CI is strong evidence that the current branch passes its configured gates; it is not a substitute for the remaining semantic parity review.
