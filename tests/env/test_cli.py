@@ -36,7 +36,6 @@ def test_missing_subcommand_rejected():
         main([])
 
 
-
 def test_show_settings_emits_safe_json(tmp_path, capsys):
     import json
 
