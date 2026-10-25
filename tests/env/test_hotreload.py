@@ -124,7 +124,6 @@ def test_background_thread_applies_file_change(tmp_path):
     finally:
         r.stop()
 
-
 def test_added_and_removed_non_reloadable_keys_are_rejected():
     r = HotReloader(
         lambda: {"safe": 2, "added": "new"},
