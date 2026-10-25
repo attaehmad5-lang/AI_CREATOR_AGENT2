@@ -122,7 +122,9 @@ def fake_torch(cuda=False, hip=None, mps=False, devices=()):
     )
 
 
-def make_probes(system="Linux", machine="x86_64", torch=None, which=None, run=None, env=None):
+def make_probes(
+    system="Linux", machine="x86_64", torch=None, which=None, run=None, env=None
+):
     which = which or {}
     run = run or {}
     return Probes(
@@ -147,7 +149,10 @@ def test_cuda_via_torch_reports_device_metadata():
 @pytest.mark.parametrize("value", ["", "-1", " -1 "])
 def test_cuda_visible_devices_disables_all_devices(value):
     torch = fake_torch(cuda=True, devices=[("GPU", 1)])
-    assert detect_cuda(make_probes(torch=torch, env={"CUDA_VISIBLE_DEVICES": value})) == []
+    assert (
+        detect_cuda(make_probes(torch=torch, env={"CUDA_VISIBLE_DEVICES": value}))
+        == []
+    )
 
 
 def test_cpu_only_torch_overrides_nvidia_smi():
@@ -161,7 +166,9 @@ def test_cpu_only_torch_overrides_nvidia_smi():
 
 def test_nvidia_smi_discovers_multiple_gpus_without_torch():
     output = "NVIDIA A, 24564, 550.1\nNVIDIA B, 24576, 550.1\n"
-    found = detect_cuda(make_probes(which={"nvidia-smi": "/x"}, run={"nvidia-smi": output}))
+    found = detect_cuda(
+        make_probes(which={"nvidia-smi": "/x"}, run={"nvidia-smi": output})
+    )
     assert [device.index for device in found] == [0, 1]
     assert found[1].driver == "550.1"
 
@@ -203,12 +210,17 @@ def test_rocminfo_keeps_only_gpu_agents():
 def test_rocm_missing_binary_and_hidden_devices_return_empty():
     assert detect_rocm(make_probes()) == []
     torch = fake_torch(cuda=True, hip="6.0", devices=[("GPU", 1)])
-    assert detect_rocm(make_probes(torch=torch, env={"HIP_VISIBLE_DEVICES": "-1"})) == []
+    assert (
+        detect_rocm(make_probes(torch=torch, env={"HIP_VISIBLE_DEVICES": "-1"}))
+        == []
+    )
 
 
 def test_mps_torch_and_platform_fallbacks():
     found = detect_mps(
-        make_probes("Darwin", "arm64", torch=fake_torch(mps=True), run={"sysctl": "Apple M3"})
+        make_probes(
+            "Darwin", "arm64", torch=fake_torch(mps=True), run={"sysctl": "Apple M3"}
+        )
     )
     assert found[0].name == "Apple M3"
     assert found[0].torch_device == "mps"
