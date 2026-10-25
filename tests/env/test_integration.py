@@ -98,3 +98,84 @@ time.sleep(30)
         if proc.poll() is None:
             proc.kill()
             proc.wait(timeout=5)
+
+
+@pytest.mark.skipif(os.name != "posix", reason="POSIX signal semantics")
+@pytest.mark.parametrize("sig", [2, 15])
+def test_signal_exit_persists_state_and_runs_cleanup(tmp_path, sig):
+    import signal
+
+    state, marker = tmp_path / "state.json", tmp_path / "marker.txt"
+    signal_name = signal.Signals(sig).name
+    code = """
+import pathlib, sys, time
+from ai_creator_agent.env.lifecycle import ShutdownCoordinator
+state, marker = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2])
+c = ShutdownCoordinator(state, lambda: {'jobs': 7})
+c.add_hook('mark', lambda: marker.write_text('hook-ran', encoding='utf-8'))
+c.install()
+print('ready', flush=True)
+time.sleep(30)
+"""
+    proc = subprocess.Popen(
+        [sys.executable, "-c", code, str(state), str(marker)],
+        env=child_env(), stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+    )
+    try:
+        assert proc.stdout is not None
+        assert proc.stdout.readline().strip() == "ready"
+        proc.send_signal(sig)
+        assert proc.wait(timeout=10) == 128 + sig
+        assert marker.read_text(encoding="utf-8") == "hook-ran"
+        saved = json.loads(state.read_text(encoding="utf-8"))
+        assert saved["state"] == {"jobs": 7}
+        assert saved["reason"] == f"signal:{signal_name}"
+    finally:
+        if proc.poll() is None:
+            proc.kill()
+            proc.wait(timeout=5)
+
+
+def test_crashed_child_leaves_workspace_for_stale_sweep(tmp_path):
+    from ai_creator_agent.env.ephemeral import sweep_stale
+
+    root = tmp_path / "workspaces"
+    code = """
+import os, pathlib, sys
+from ai_creator_agent.env.ephemeral import EphemeralWorkspace
+workspace = EphemeralWorkspace(pathlib.Path(sys.argv[1]))
+path = workspace.create()
+(path / 'frame.bin').write_bytes(b'test')
+print(path, flush=True)
+os._exit(9)
+"""
+    proc = subprocess.run(
+        [sys.executable, "-c", code, str(root)],
+        env=child_env(), capture_output=True, text=True, timeout=10,
+    )
+    assert proc.returncode == 9
+    leftover = Path(proc.stdout.strip())
+    assert leftover.is_dir()
+    assert sweep_stale(root) == [leftover]
+    assert not leftover.exists()
+
+
+@pytest.mark.skipif(not sys.platform.startswith("linux"), reason="Linux /proc and RLIMIT semantics")
+def test_real_memory_snapshot_and_guard_detect_growth():
+    from ai_creator_agent.env.resources import GuardState, MemoryGuard, read_memory_snapshot
+
+    before = read_memory_snapshot()
+    assert before.total_bytes > 0
+    assert 0 < before.rss_bytes < before.total_bytes
+    ballast = bytearray(24 * 1024 * 1024)
+    for offset in range(0, len(ballast), 4096):
+        ballast[offset] = 1
+    fired = []
+    guard = MemoryGuard(
+        before.rss_bytes + 8 * 1024 * 1024,
+        reader=read_memory_snapshot,
+        on_exceed=fired.append,
+    )
+    assert guard.check_once() is GuardState.EXCEEDED
+    assert len(fired) == 1
+    del ballast
