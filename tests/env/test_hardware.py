@@ -109,7 +109,9 @@ MB = 1024 * 1024
 
 
 def fake_torch(cuda=False, hip=None, mps=False, devices=()):
-    props = [SimpleNamespace(name=name, total_memory=memory * MB) for name, memory in devices]
+    props = [
+        SimpleNamespace(name=name, total_memory=memory * MB) for name, memory in devices
+    ]
     return SimpleNamespace(
         __version__="2.3.0",
         version=SimpleNamespace(hip=hip),
@@ -150,8 +152,7 @@ def test_cuda_via_torch_reports_device_metadata():
 def test_cuda_visible_devices_disables_all_devices(value):
     torch = fake_torch(cuda=True, devices=[("GPU", 1)])
     assert (
-        detect_cuda(make_probes(torch=torch, env={"CUDA_VISIBLE_DEVICES": value}))
-        == []
+        detect_cuda(make_probes(torch=torch, env={"CUDA_VISIBLE_DEVICES": value})) == []
     )
 
 
@@ -211,8 +212,7 @@ def test_rocm_missing_binary_and_hidden_devices_return_empty():
     assert detect_rocm(make_probes()) == []
     torch = fake_torch(cuda=True, hip="6.0", devices=[("GPU", 1)])
     assert (
-        detect_rocm(make_probes(torch=torch, env={"HIP_VISIBLE_DEVICES": "-1"}))
-        == []
+        detect_rocm(make_probes(torch=torch, env={"HIP_VISIBLE_DEVICES": "-1"})) == []
     )
 
 
