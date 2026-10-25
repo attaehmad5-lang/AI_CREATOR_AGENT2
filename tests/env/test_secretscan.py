@@ -65,7 +65,7 @@ def test_line_numbers_are_accurate():
 
 
 def test_generic_assignment_high_entropy_flagged():
-    line = 'api_key = "Zk3p9Qw7Lm2Xv8Rt4Yb6Nc1Hd5"'
+    line = "api" + '_key = "Zk3p9Qw7Lm2Xv8Rt4Yb6Nc1Hd5"'
     assert scan_text(line)[0].rule == "generic-assignment"
 
 
