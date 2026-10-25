@@ -2,6 +2,7 @@
 
 import json
 import os
+import signal
 import subprocess
 import sys
 import time
@@ -236,3 +237,120 @@ def test_hot_reload_only_changes_allowlisted_environment_values(tmp_path):
     broken = reloader.poll_once()
     assert broken.error
     assert reloader.get("LOG_LEVEL") == "DEBUG"
+
+@pytest.mark.skipif(os.name != "posix", reason="POSIX signal semantics")
+def test_second_signal_force_exits_during_slow_cleanup(tmp_path):
+    state = tmp_path / "state.json"
+    code = """
+import pathlib, sys, time
+from ai_creator_agent.env.lifecycle import ShutdownCoordinator
+coordinator = ShutdownCoordinator(pathlib.Path(sys.argv[1]))
+coordinator.add_hook("slow", lambda: time.sleep(20))
+coordinator.install()
+print("ready", flush=True)
+time.sleep(30)
+"""
+    proc = subprocess.Popen(
+        [sys.executable, "-c", code, str(state)],
+        env=child_env(),
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    try:
+        assert proc.stdout is not None
+        assert proc.stdout.readline().strip() == "ready"
+        proc.send_signal(signal.SIGTERM)
+        time.sleep(0.5)
+        started = time.time()
+        proc.send_signal(signal.SIGTERM)
+        assert proc.wait(timeout=10) == 128 + signal.SIGTERM
+        assert time.time() - started < 5
+    finally:
+        if proc.poll() is None:
+            proc.kill()
+            proc.wait(timeout=5)
+
+
+@pytest.mark.skipif(not sys.platform.startswith("linux"), reason="Linux RLIMIT_DATA semantics")
+def test_real_memory_cap_blocks_large_allocation():
+    code = """
+from ai_creator_agent.env.resources import apply_memory_cap, MB
+result = apply_memory_cap(300 * MB)
+try:
+    blob = bytearray(900 * MB)
+    for i in range(0, len(blob), 4096):
+        blob[i] = 1
+    print("not-blocked")
+except MemoryError:
+    print("blocked", result.applied_bytes // MB)
+"""
+    proc = subprocess.run(
+        [sys.executable, "-c", code],
+        env=child_env(),
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    assert proc.returncode == 0, proc.stderr
+    assert proc.stdout.strip() == "blocked 300", proc.stdout + proc.stderr
+
+
+@pytest.mark.skipif(not sys.platform.startswith("linux"), reason="Linux RLIMIT_DATA semantics")
+def test_real_memory_cap_cannot_be_raised_again():
+    code = """
+import resource
+from ai_creator_agent.env.resources import apply_memory_cap, MB
+apply_memory_cap(300 * MB)
+try:
+    resource.setrlimit(resource.RLIMIT_DATA, (2000 * MB, 2000 * MB))
+    print("raised")
+except ValueError:
+    print("cannot-raise")
+"""
+    proc = subprocess.run(
+        [sys.executable, "-c", code],
+        env=child_env(),
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    assert proc.returncode == 0, proc.stderr
+    assert proc.stdout.strip() == "cannot-raise", proc.stdout + proc.stderr
+
+
+def test_real_cli_hardware_and_invalid_preference():
+    base = [sys.executable, "-m", "ai_creator_agent.env", "hardware"]
+    good = subprocess.run(
+        base, env=child_env(), capture_output=True, text=True, timeout=10
+    )
+    bad = subprocess.run(
+        [*base, "--preference", "tpu"],
+        env=child_env(),
+        capture_output=True,
+        text=True,
+        timeout=10,
+    )
+    assert good.returncode == 0 and "selected:" in good.stdout
+    assert bad.returncode == 2
+
+
+def test_real_diagnostics_run_without_failures(tmp_path):
+    from ai_creator_agent.env.diagnostics import (
+        DiagnosticConfig,
+        DiagnosticSuite,
+        Status,
+    )
+
+    pin = tmp_path / ".python-version"
+    pin.write_text(".".join(str(p) for p in sys.version_info[:3]) + "\\n")
+    config = DiagnosticConfig(
+        pin_file=pin,
+        require_venv=False,
+        min_free_ram_mb=64,
+        min_free_disk_mb=16,
+        required_dirs=(tmp_path / "data", tmp_path / "tmp"),
+    )
+    report = DiagnosticSuite(config).run()
+    failed = [result for result in report.results if result.status is Status.FAIL]
+    assert not failed, report.render_text()
