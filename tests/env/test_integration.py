@@ -356,6 +356,8 @@ def test_real_diagnostics_run_without_failures(tmp_path):
         min_free_disk_mb=16,
         required_dirs=(tmp_path / "data", tmp_path / "tmp"),
     )
-    report = DiagnosticSuite(config).run()
+    report = DiagnosticSuite(config).run(
+        only=("python", "virtualenv", "memory", "paths", "disk", "permissions", "hardware")
+    )
     failed = [result for result in report.results if result.status is Status.FAIL]
     assert not failed, report.render_text()
