@@ -119,7 +119,10 @@ time.sleep(30)
 """
     proc = subprocess.Popen(
         [sys.executable, "-c", code, str(state), str(marker)],
-        env=child_env(), stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+        env=child_env(),
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
     )
     try:
         assert proc.stdout is not None
@@ -151,7 +154,10 @@ os._exit(9)
 """
     proc = subprocess.run(
         [sys.executable, "-c", code, str(root)],
-        env=child_env(), capture_output=True, text=True, timeout=10,
+        env=child_env(),
+        capture_output=True,
+        text=True,
+        timeout=10,
     )
     assert proc.returncode == 9
     leftover = Path(proc.stdout.strip())
@@ -160,7 +166,9 @@ os._exit(9)
     assert not leftover.exists()
 
 
-@pytest.mark.skipif(not sys.platform.startswith("linux"), reason="Linux /proc and RLIMIT semantics")
+@pytest.mark.skipif(
+    not sys.platform.startswith("linux"), reason="Linux /proc and RLIMIT semantics"
+)
 def test_real_memory_snapshot_and_guard_detect_growth():
     from ai_creator_agent.env.resources import (
         GuardState,
