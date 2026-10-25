@@ -59,7 +59,9 @@ def test_diagnose_json_renders_report(monkeypatch, tmp_path, capsys):
             return "diagnostic report"
 
     monkeypatch.setattr(DiagnosticSuite, "run", lambda self, only=None: Report())
-    assert main(["diagnose", "--json", "--profile", "dev", "--root", str(tmp_path)]) == 1
+    assert (
+        main(["diagnose", "--json", "--profile", "dev", "--root", str(tmp_path)]) == 1
+    )
     assert capsys.readouterr().out.strip() == '{"status":"warning"}'
 
 
