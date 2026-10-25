@@ -89,3 +89,38 @@ def test_start_stop_is_idempotent():
     r.stop()
     r.stop()
     assert r._thread is None
+
+
+
+def test_poll_once_handles_deleted_watch_file(tmp_path):
+    watched = tmp_path / "config.env"
+    watched.write_text("x=1")
+    r = HotReloader(lambda: {"x": 1}, {"x": 1}, {"x"}, watch_files=[watched])
+    watched.unlink()
+    result = r.poll_once()
+    assert result is not None
+
+
+def test_background_thread_applies_file_change(tmp_path):
+    watched = tmp_path / "config.env"
+    watched.write_text("x=1")
+    value = {"x": 1}
+    r = HotReloader(
+        lambda: value,
+        {"x": 1},
+        {"x"},
+        watch_files=[watched],
+        poll_interval_s=0.02,
+    )
+    r.start()
+    r.start()
+    try:
+        value["x"] = 2
+        time.sleep(0.01)
+        watched.write_text("x=2 changed")
+        deadline = time.time() + 3
+        while time.time() < deadline and r.get("x") != 2:
+            time.sleep(0.02)
+        assert r.get("x") == 2
+    finally:
+        r.stop()
