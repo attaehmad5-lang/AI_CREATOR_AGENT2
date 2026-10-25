@@ -265,3 +265,15 @@ def test_detect_hardware_reports_torch_version_and_cpu():
     assert report.torch_version == "2.3.0"
     assert report.cpu_count >= 1
     assert report.devices[-1].kind is DeviceKind.CPU
+
+
+
+def test_explicit_unavailable_strict_raises():
+    with pytest.raises(HardwareError):
+        select_device([cpu_device()], "cuda", strict=True)
+
+
+def test_detect_hardware_cpu_fallback_without_torch():
+    report = detect_hardware("cuda", probes=Probes(torch=lambda: None))
+    assert report.selected.kind is DeviceKind.CPU and report.fallback_reason
+    assert report.torch_version is None
